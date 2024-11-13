@@ -110,7 +110,7 @@ export async function getGuestStates(): Promise<GuestState[]> {
 
   const data = await getTableInfo({
     tableData: res.values as string[][],
-  }) as GuestState[];
+  }) as unknown as GuestState[];
 
   return data;
 }
@@ -121,7 +121,7 @@ export async function getGuestsList(): Promise<Guest[]> {
 
   const data = await getTableInfo({
     tableData: res.values as string[][],
-  }) as Guest[];
+  })  as unknown as Guest[];
 
   const guestsWithLink = data.map((guest) => {
     const guestSalted = encodeBase64WithSalt(guest.id)
