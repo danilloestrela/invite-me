@@ -7,7 +7,6 @@ interface Data {
 }
 
 export default function Page() {
-  const params = useParams();
   const guest = true;
   const skeletonStyles = "bg-gray-300"
 
