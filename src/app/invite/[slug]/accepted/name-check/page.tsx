@@ -28,11 +28,11 @@ export default function Page() {
   const { guest, isLoading, error, updateGuestMutation } = useGuest(slug as string);
 
   const isAttendingNameCheckPending = guest?.data?.status === guestEnum.attending_name_check_pending;
-
-  if (!isAttendingNameCheckPending && guest?.data?.status) {
+  console.log({isAttendingNameCheckPending, guest, updateGuestMutation});
+  if (!isAttendingNameCheckPending && guest?.data?.status && !updateGuestMutation.isPending) {
     const redirectTo = checkNextStep({ slug: slug as string, status: guest?.data?.status as GuestStatusEnum });
     if (redirectTo) router.push(redirectTo);
-    return null;
+    return <NameCheckSkeleton />;
   }
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {

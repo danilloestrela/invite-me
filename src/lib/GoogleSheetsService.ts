@@ -100,7 +100,7 @@ async function getTableBasedOnRange(range: string): Promise<GetTableBasedOnRange
   const headers = res.data.values?.[0];
   // table rows (without headers)
   const rows = res.data.values?.slice(1);
-  if(!headers) throw new Error('No headers found');
+  if (!headers) throw new Error('No headers found');
   if (!rows) throw new Error('No guests found');
 
   return { res: res.data, sheets, headers, rows };
@@ -109,7 +109,7 @@ async function getTableBasedOnRange(range: string): Promise<GetTableBasedOnRange
 export async function getGuestStates(): Promise<GuestState[]> {
   const { res, rows } = await getTableBasedOnRange(guestStatesTableRange);
 
-  if(!rows) throw new Error('No guest states found');
+  if (!rows) throw new Error('No guest states found');
 
   const data = await getTableInfo({
     tableData: res.values as string[][],
@@ -119,12 +119,12 @@ export async function getGuestStates(): Promise<GuestState[]> {
 }
 
 export async function getGuestsList(): Promise<Guest[]> {
-  const { res, rows} = await getTableBasedOnRange(guestListTableRange);
-  if(!rows) throw new Error('No guests found');
+  const { res, rows } = await getTableBasedOnRange(guestListTableRange);
+  if (!rows) throw new Error('No guests found');
 
   const data = await getTableInfo({
     tableData: res.values as string[][],
-  })  as unknown as Guest[];
+  }) as unknown as Guest[];
 
   const guestsWithLink = data.map((guest) => {
     const guestSalted = encodeBase64WithSalt(guest.id)
@@ -137,8 +137,8 @@ export async function getGuestsList(): Promise<Guest[]> {
   return guestsWithLink;
 }
 
-export interface MergedGuest extends Guest, Omit<GuestState, 'guest_id'> {}
-export async function getMergedGuests(): Promise<MergedGuest[] | Guest[]> {
+export interface MergedGuest extends Guest, Omit<GuestState, 'guest_id'> { }
+export async function getMergedGuests(): Promise<MergedGuest[]> {
   const guests = await getGuestsList(); // data from Lista Oficial
   const guestStates = await getGuestStates(); // data from guest_states, now an array of objects
 
@@ -146,29 +146,26 @@ export async function getMergedGuests(): Promise<MergedGuest[] | Guest[]> {
 
   const mergedGuests = guests.map(guest => {
     const guestState = guestStateMap.get(guest.id); // Get matching state data by guest `id`
-    const toMergeGuestState = guestState ? { ...guestState, id: guestState.guest_id } : {};
-    if (toMergeGuestState) {
-      return {
-        ...guest,
-        ...toMergeGuestState, // Merge guest and guest state properties, guestState fields will overwrite if names conflict
-      };
-    }
-    return guest; // If no match is found, return the guest as is
+    const toMergeGuestState = { ...guestState, id: guest.id }
+    return {
+      ...guest,
+      ...toMergeGuestState,
+    };
   });
 
-  return mergedGuests;
+  return mergedGuests as MergedGuest[];
 }
 
 
-export async function getGuests(): Promise<Guest[]> {
+export async function getGuests(): Promise<MergedGuest[]> {
   const mergedGuests = await getMergedGuests();
   return mergedGuests;
 }
 
-export async function getGuestById(id: string): Promise<Guest | undefined> {
+export async function getGuestById(id: string): Promise<MergedGuest | undefined> {
   const guests = await getGuests();
   const guest = guests.find((guest) => guest.id === id);
-  if(!guest) throw new Error('Guest not found');
+  if (!guest) throw new Error('Guest not found');
   return guest;
 }
 
@@ -213,8 +210,8 @@ export async function updateGuestField({ id, fields }: UpdateGuestApiProps) {
       throw new Error('Field not found');
     }
   }
+
   const sheets = await initGoogleSheetWithGoogleApis();
-  const results = []; // Array to store results of each update
 
   // Executa a atualização em batch para Lista Oficial, se houver updates
   if (guestUpdates.length > 0) {
@@ -228,7 +225,6 @@ export async function updateGuestField({ id, fields }: UpdateGuestApiProps) {
     if (guestRes.status !== 200) {
       throw new Error('Batch update for guest list failed.');
     }
-    results.push(guestRes.data); // Armazena o resultado da atualização de Lista Oficial
   }
 
   // Executa a atualização em batch para guest_states, se houver updates
@@ -243,14 +239,26 @@ export async function updateGuestField({ id, fields }: UpdateGuestApiProps) {
     if (guestStateRes.status !== 200) {
       throw new Error('Batch update for guest states failed.');
     }
-    results.push(guestStateRes.data); // Armazena o resultado da atualização de guest_states
   }
+  const updatedGuest = await getGuestById(id);
+  if (!updatedGuest) throw new Error('Updated guest, but could not return updated guests');
 
-  return fields; // Retorna os campos atualizados como confirmação
+  // Update the updatedGuest with the new field values
+  for (const { field, value } of validatedFormat) {
+    const updatedGuestKeys = Object.keys(updatedGuest) as (keyof MergedGuest)[];
+    if (field in updatedGuestKeys) {
+      // @ts-expect-error: Expect TypeScript error for dynamic field assignment
+      updatedGuest[field] = value;
+    }
+  }
+  if (guestStateUpdates.length > 0) updatedGuest.updated_at = formattedDate;
+
+  // if success, return the updated fields
+  return updatedGuest;
 }
 
 
-async function getFieldIndexAndRowIndex({field, id, range}: {field: string, id: string, range: string}) {
+async function getFieldIndexAndRowIndex({ field, id, range }: { field: string, id: string, range: string }) {
   const { sheets, headers, rows } = await getTableBasedOnRange(range);
   // Encontrar o índice da coluna e da linha
   const fieldIndex = headers.indexOf(field);
