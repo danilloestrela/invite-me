@@ -22,7 +22,7 @@ export default function Page() {
         <div className="flex flex-col items-start justify-center gap-4 h-full">
           <h1 className="font-heading text-4xl"> Obrigado pela confirmação!</h1>
           <p className="text-justify">
-            Entendo que não é sempre que podemos comparecer e agradeço por ter me confirmado com antecedência, {guest.data.name}!
+            Entendo que não é sempre que podemos comparecer e agradeço por ter me confirmado com antecedência, nome aqui!
             <br />
             Caso precise de alguma informação, pode entrar em contato comigo pelo whatsapp.
           </p>
