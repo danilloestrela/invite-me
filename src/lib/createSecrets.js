@@ -16,7 +16,7 @@ const secrets = {
   universe_domain: process.env.GOOGLE_SERVICE_ACCOUNT_UNIVERSE_DOMAIN,
 };
 
-const filePath = path.join(__dirname, 'secrets.json');
+const filePath = path.join(__dirname, '../../secrets.json');
 
 fs.writeFileSync(filePath, JSON.stringify(secrets, null, 2));
 
