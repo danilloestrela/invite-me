@@ -1,20 +1,16 @@
 'use client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Guest } from '@/lib/GoogleSheetsService';
-import { useState } from 'react';
 
 interface Data {
   data: Guest;
 }
 
 export default function Page() {
-  // const params = useParams();
-  const [guest, setGuest] = useState<Data | null>({data :{ id: '', name: 'Fulano de tal', email: '', phone: '', accepted: false }});
+  const params = useParams();
+  const guest = true;
   const skeletonStyles = "bg-gray-300"
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setGuest({...guest, data: {...guest.data, name: e.target.value}});
-  }
 
   return (
     <>
