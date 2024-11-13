@@ -20,7 +20,7 @@ export default function Home() {
 
             </p>
             <PartyCountdown outerBoxClassName="w-full" targetDateString="January 31, 2025 00:00:00">
-              <h2 className="text-xl font-bold">Vamos festejar juntos em 31 de Dezembro de 2024</h2>
+              <h2 className="text-xl font-bold">Vamos festejar juntos em 31 de Janeiro de 2024</h2>
             </PartyCountdown>
           </div>
         </section>
