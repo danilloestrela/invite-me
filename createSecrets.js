@@ -6,29 +6,31 @@ const path = require('path');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 
 // Function to manually load environment variables from a .env file
-function loadEnv(filePath) {
-  const envFileContent = fs.readFileSync(filePath, 'utf8');
-  const lines = envFileContent.split('\n');
+if(process.env.NODE_ENV !== 'production') {
+  function loadEnv(filePath) {
+    const envFileContent = fs.readFileSync(filePath, 'utf8');
+    const lines = envFileContent.split('\n');
 
-  lines.forEach(line => {
-    const [key, value] = line.split('=');
-    if (key && value) {
-      process.env[key.trim()] = removeSurroundingQuotes(value.trim());
-    }
-  });
-}
-
-// Function to remove surrounding quotes if present
-function removeSurroundingQuotes(value) {
-  if (value.startsWith('"') && value.endsWith('"')) {
-    return value.slice(1, -1);
+    lines.forEach(line => {
+      const [key, value] = line.split('=');
+      if (key && value) {
+        process.env[key.trim()] = removeSurroundingQuotes(value.trim());
+      }
+    });
   }
-  return value;
+
+  // Function to remove surrounding quotes if present
+  function removeSurroundingQuotes(value) {
+    if (value.startsWith('"') && value.endsWith('"')) {
+      return value.slice(1, -1);
+    }
+    return value;
+  }
+  // Load environment variables from .env file
+  loadEnv(path.join(__dirname, '.env'));
 }
 
 
-// Load environment variables from .env file
-loadEnv(path.join(__dirname, '.env'));
 
 const secrets = {
   type: process.env.GOOGLE_SERVICE_ACCOUNT_TYPE,
