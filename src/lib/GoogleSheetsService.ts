@@ -72,9 +72,12 @@ export interface GuestState {
 }
 
 export async function initGoogleSheetWithGoogleApis() {
-  const auth = await google.auth.getClient({
+  const auth = new google.auth.JWT({
+    email: process.env.GOOGLE_SERVICE_ACCOUNT_CLIENT_EMAIL,
+    key: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY,
     scopes: SCOPES,
   });
+
   const sheets = google.sheets({ version: 'v4', auth });
 
   return sheets;
