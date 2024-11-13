@@ -43,7 +43,7 @@ export default function CountdownTimer({ targetDateString = null, endMessage = n
     }, 1000);
 
     return () => clearInterval(countdown);
-  }, [loading, onLoadingChange]);
+  }, [loading, onLoadingChange, endMessage, targetDateString]);
 
   return (
     <p

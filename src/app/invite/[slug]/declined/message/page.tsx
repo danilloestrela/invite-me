@@ -3,11 +3,6 @@ import { Location } from '@/components/Location';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
-import { Guest } from '@/lib/GoogleSheetsService';
-
-interface Data {
-  data: Guest;
-}
 
 export default function Page() {
   const guest = true;

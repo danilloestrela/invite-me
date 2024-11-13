@@ -109,7 +109,6 @@ export async function getGuestStates(): Promise<GuestState[]> {
   if(!rows) throw new Error('No guest states found');
 
   const data = await getTableInfo({
-    table_name_as: 'guest_states',
     tableData: res.values as string[][],
   }) as GuestState[];
 
@@ -121,7 +120,6 @@ export async function getGuestsList(): Promise<Guest[]> {
   if(!rows) throw new Error('No guests found');
 
   const data = await getTableInfo({
-    table_name_as: 'Lista Oficial',
     tableData: res.values as string[][],
   }) as Guest[];
 

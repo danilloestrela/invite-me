@@ -1,10 +1,5 @@
 'use client';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Guest } from '@/lib/GoogleSheetsService';
-
-interface Data {
-  data: Guest;
-}
 
 export default function Page() {
   const guest = true;

@@ -63,7 +63,7 @@ export default function Page() {
   });
 
   const handlePresenceAction = (action: boolean = false) => {
-    let status = action ? guestEnum.attending_name_check_pending : guestEnum.not_attending_message_pending;
+    const status = action ? guestEnum.attending_name_check_pending : guestEnum.not_attending_message_pending;
     updateGuestMutation.mutate({ slug: slug as string, fields: [{ status }] });
   };
 

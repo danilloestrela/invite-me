@@ -22,7 +22,7 @@ export default function Home() {
     if(authenticated && !guests.length) {
       fetch('/api/guests').then((res) => res.json()).then((guests) => setGuests(guests.data))
     }
-  }, [authenticated]);
+  }, [authenticated, guests]);
   return (
     <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start h-full p-10">
       {!authenticated && <div className="bg-white border-black border-[1px] rounded flex w-full p-2">

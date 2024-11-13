@@ -2,15 +2,8 @@
 import { Location } from '@/components/Location';
 import { PartyCountdown } from '@/components/PartyCountdown';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Guest } from '@/lib/GoogleSheetsService';
-import { useParams } from 'next/navigation';
-
-interface Data {
-  data: Guest;
-}
 
 export default function Page() {
-  const params = useParams();
   const guest = true;
   const skeletonStyles = "bg-gray-300"
 
