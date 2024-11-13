@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "node ./src/lib/generateSecrets.js && next build",
+    "build": "node ./createSecrets.js && next build",
     "start": "next start",
     "lint": "next lint",
     "shadcn": "npx shadcn-ui@latest add"
