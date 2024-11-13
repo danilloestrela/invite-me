@@ -1,15 +1,14 @@
 'use client';
 import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { Location } from '@/components/Location';
+import { NameCheckSkeleton } from '@/components/modules/invite/Skeletons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
-import { fetchGuest } from '@/lib/api/getters';
-import { updateGuestField } from '@/lib/api/mutations';
+import { useGuest } from '@/hooks/useGuest';
 import { GuestStatusEnum, MergedGuest } from '@/lib/GoogleSheetsService';
 import { checkNextStep } from '@/lib/StepService';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
 
 interface Data {
@@ -26,42 +25,9 @@ export default function Page() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const slug = params.slug;
-  const skeletonStyles = "bg-gray-300";
+  const { guest, isLoading, error, updateGuestMutation } = useGuest(slug as string);
 
-  const { data: guest, isLoading, error } = useQuery<Data>({
-    queryKey: ['guest', slug],
-    queryFn: () => fetchGuest(slug as string),
-    initialData: { data: null } as Data,
-  });
-
-  const mutation = useMutation({
-    mutationFn: (newName: string) => updateGuestField({ slug: slug as string, fields: [{ name: newName }, { status: guestEnum.attending }]}),
-    onSuccess: (updatedField) => {
-      toast({
-        title: 'Sucesso!',
-        description: 'Nome confirmado com sucesso!',
-      });
-      queryClient.setQueryData(['guest', slug], (oldData: Data | undefined) => {
-        if (!oldData?.data) return oldData;
-        return {
-          data: {
-            ...oldData.data,
-            ...updatedField,
-          },
-        };
-      });
-      const redirectTo = checkNextStep({slug: slug as string, status: updatedField.status as GuestStatusEnum});
-      if(redirectTo) router.push(redirectTo);
-    },
-    onError: () => {
-      toast({
-        title: 'Erro ao confirmar o nome',
-        description: 'Por favor, tente novamente.',
-      });
-    },
-  });
-
-  const isAttendingNameCheckPending  = guest?.data?.status === guestEnum.attending_name_check_pending;
+  const isAttendingNameCheckPending = guest?.data?.status === guestEnum.attending_name_check_pending;
 
   if (!isAttendingNameCheckPending && guest?.data?.status) {
     const redirectTo = checkNextStep({ slug: slug as string, status: guest?.data?.status as GuestStatusEnum });
@@ -82,25 +48,9 @@ export default function Page() {
   };
 
   const handleConfirmation = () => {
-    if(!guest?.data?.name) return;
-    mutation.mutate(guest.data.name);
+    if (!guest?.data?.name) return;
+    updateGuestMutation.mutate({ slug: slug as string, fields: [{ name: guest.data.name }, { status: guestEnum.attending }] });
   };
-
-
-
-  if (isLoading || mutation.isPending || !guest?.data) {
-    return (
-      <div className="flex flex-col gap-4">
-        <Skeleton className={`w-96 h-10 ${skeletonStyles}`} />
-        <Skeleton className={`w-80 h-10 ${skeletonStyles}`} />
-        <Skeleton className={`w-full h-6 ${skeletonStyles}`} />
-        <Skeleton className={`w-24 h-6 ${skeletonStyles}`} />
-        <Skeleton className={`w-60 h-6 ${skeletonStyles}`} />
-        <Skeleton className={`w-96 h-6 ${skeletonStyles}`} />
-        <Skeleton className={`w-full h-12 ${skeletonStyles}`} />
-      </div>
-    );
-  }
 
   if (error) {
     toast({
@@ -109,8 +59,9 @@ export default function Page() {
     });
   }
 
-  return (
-    <>
+  if (!isLoading || !updateGuestMutation.isPending || !guest?.data) {
+    return (
+      <>
         <div className="flex flex-col items-start justify-center gap-4 h-full">
           <h1 className="font-heading text-4xl">Que maravilha! Confirmado! <br /> Só mais uma coisa...</h1>
           <p className="text-justify">
@@ -144,8 +95,12 @@ export default function Page() {
             time="22 horas"
             address="Av. Gov. Flávio Ribeiro Coutinho, 220 - Lot. Oceania II, João Pessoa - PB, 58102-835"
             href="https://g.co/kgs/nJH1zfG"
-        />
-      </div>
-    </>
-  );
+          />
+        </div>
+      </>
+    );
+  }
+
+  return <NameCheckSkeleton />;
+
 }

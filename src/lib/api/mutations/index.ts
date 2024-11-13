@@ -5,7 +5,7 @@ export interface UpdateGuestFieldProps {
     fields: Partial<{ [key in keyof MergedGuest]: string | number | Date }>[];
 }
 
-export const updateGuestField = async ({ slug, fields }: UpdateGuestFieldProps) => {
+export const updateGuestField = async ({ slug, fields }: UpdateGuestFieldProps): Promise<MergedGuest | null> => {
   const fetchResponse = await fetch(`/api/guests/${slug}`, {
       method: 'POST',
       body: JSON.stringify(fields),
