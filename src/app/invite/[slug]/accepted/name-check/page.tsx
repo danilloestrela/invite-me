@@ -6,14 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { useGuest } from '@/hooks/useGuest';
-import { GuestStatusEnum, MergedGuest } from '@/lib/GoogleSheetsService';
+import { GuestData } from '@/lib/api/mutations';
+import { GuestStatusEnum } from '@/lib/GoogleSheetsService';
 import { checkNextStep } from '@/lib/StepService';
 import { useQueryClient } from '@tanstack/react-query';
-import { useParams, useRouter } from 'next/navigation';
-
-interface Data {
-  data: MergedGuest | null;
-}
+import { redirect, useParams } from 'next/navigation';
 
 const guestEnum: Partial<Record<GuestStatusEnum, GuestStatusEnum>> = {
   attending: 'attending',
@@ -22,21 +19,20 @@ const guestEnum: Partial<Record<GuestStatusEnum, GuestStatusEnum>> = {
 
 export default function Page() {
   const params = useParams();
-  const router = useRouter();
   const queryClient = useQueryClient();
   const slug = params.slug;
   const { guest, isLoading, error, updateGuestMutation } = useGuest(slug as string);
 
   const isAttendingNameCheckPending = guest?.data?.status === guestEnum.attending_name_check_pending;
-  console.log({isAttendingNameCheckPending, guest, updateGuestMutation});
+
   if (!isAttendingNameCheckPending && guest?.data?.status && !updateGuestMutation.isPending) {
     const redirectTo = checkNextStep({ slug: slug as string, status: guest?.data?.status as GuestStatusEnum });
-    if (redirectTo) router.push(redirectTo);
+    if (redirectTo) redirect(redirectTo);
     return <NameCheckSkeleton />;
   }
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    queryClient.setQueryData(['guest', slug], (oldData: Data | undefined) => {
+    queryClient.setQueryData(['guest', slug], (oldData: GuestData | undefined) => {
       if (!oldData?.data) return oldData;
       return {
         data: {

@@ -1,54 +1,55 @@
+'use client';
 import { fetchGuest } from '@/lib/api/getters';
-import { updateGuestField, UpdateGuestFieldProps } from '@/lib/api/mutations';
-import { GuestStatusEnum, MergedGuest } from '@/lib/GoogleSheetsService';
+import { GuestData, updateGuestField, UpdateGuestFieldProps } from '@/lib/api/mutations';
+import { GuestStatusEnum } from '@/lib/GoogleSheetsService';
 import { useMutation, UseMutationResult, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from './use-toast';
 
-export interface Data {
-  data: MergedGuest | null;
-}
-
 export interface GuestHookReturn {
-  guest: Data;
+  guest: GuestData;
   isLoading: boolean;
   error: Error | null;
   guestEnum: Partial<Record<GuestStatusEnum, GuestStatusEnum>>;
-  updateGuestMutation: UseMutationResult<MergedGuest | null, Error, UpdateGuestFieldProps, unknown>;
+  updateGuestMutation: UseMutationResult<GuestData | null, Error, UpdateGuestFieldProps, unknown>;
 }
 
-export function useGuest(slug: string): GuestHookReturn {
+export function useGuest(slug: string, enabled: boolean = true): GuestHookReturn {
   const guestEnum: Partial<Record<GuestStatusEnum, GuestStatusEnum>> = {
+    to_be_invited: 'to_be_invited',
+    attending: 'attending',
     attending_name_check_pending: 'attending_name_check_pending',
     not_attending_message_pending: 'not_attending_message_pending',
-    to_be_invited: 'to_be_invited',
+    not_attending: 'not_attending',
+    acknowledged: 'acknowledged',
+    awaiting_accept: 'awaiting_accept',
   };
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { data: guest, isLoading, error } = useQuery<Data>({
+  const { data: guest, isLoading, error } = useQuery<GuestData>({
     queryKey: ['guest', slug],
     queryFn: () => fetchGuest(slug),
-    initialData: { data: null } as Data,
+    initialData: { data: null } as GuestData,
+    enabled,
   });
 
-  const updateGuestMutation = useMutation<MergedGuest | null, Error, UpdateGuestFieldProps>({
+  const updateGuestMutation = useMutation<GuestData | null, Error, UpdateGuestFieldProps>({
     mutationFn: (data: UpdateGuestFieldProps) => updateGuestField(data),
     onSuccess: (updatedData) => {
       toast({
         title: 'Sucesso!',
         description: 'Convidado atualizado com sucesso!',
       });
-      queryClient.setQueryData(['guest', slug], (oldData: Data | undefined) => {
-        if (!oldData?.data) return oldData;
-
+      queryClient.setQueryData(['guest', slug], (oldData: GuestData | undefined) => {
+        if (!updatedData?.data) return oldData;
+        console.log('line45', { oldData, updatedData });
         const newData = {
           data: {
-            ...oldData.data,
-            ...updatedData,
+            ...oldData?.data,
+            ...updatedData.data,
           },
         };
-        console.log('line49', { newData, oldData, updatedData });
         return newData;
-      });
+      }, );
     },
     onError: () => {
       toast({

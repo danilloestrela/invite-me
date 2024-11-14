@@ -7,6 +7,8 @@ interface CheckNextStepProps {
 
 export function checkNextStep({slug, status}: CheckNextStepProps) {
     switch(status) {
+        case "to_be_invited":
+            return `/invite/${slug}`;
         case "attending":
             return `/invite/${slug}/accepted/thank-you`;
         case "attending_name_check_pending":
