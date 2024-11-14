@@ -41,7 +41,6 @@ export function useGuest(slug: string, enabled: boolean = true): GuestHookReturn
       });
       queryClient.setQueryData(['guest', slug], (oldData: GuestData | undefined) => {
         if (!updatedData?.data) return oldData;
-        console.log('line45', { oldData, updatedData });
         const newData = {
           data: {
             ...oldData?.data,

@@ -8,8 +8,10 @@ import { useGuest } from '@/hooks/useGuest';
 import { GuestStatusEnum } from '@/lib/GoogleSheetsService';
 import { checkNextStep } from '@/lib/StepService';
 import { redirect, useParams } from 'next/navigation';
+import { useState } from 'react';
 
 export default function Page() {
+  const [code, setCode] = useState('');
   const params = useParams();
   const { toast } = useToast();
   const slug = params.slug;
@@ -17,11 +19,22 @@ export default function Page() {
 
   const handlePresenceAction = (action: boolean = false) => {
     const status = action ? guestEnum.attending_name_check_pending : guestEnum.not_attending_message_pending;
+    if (code.length !== 4 || code !== guest?.data?.code) {
+      toast({
+        title: 'Atenção!',
+        description: 'Digite o código corretamente.',
+      });
+      return;
+    }
     updateGuestMutation.mutate({ slug: slug as string, fields: [{ status }] });
   };
 
+  const handleCode = (inputCode: string) => {
+    if (inputCode.length > 4) return;
+    setCode(inputCode.toUpperCase().trim());
+  };
+
   const isToBeInvited = guest?.data?.status === guestEnum.to_be_invited;
-  console.log({ isToBeInvited, guest, updateGuestMutation });
 
   if (!isToBeInvited && guest?.data && !updateGuestMutation.isPending) {
     const redirectTo = checkNextStep({ slug: slug as string, status: guest.data?.status as GuestStatusEnum });
@@ -71,11 +84,16 @@ export default function Page() {
                     title="Atenção:"
                     description={
                       <>
-                        Você clicou para <span className="font-bold">confirmar presença</span>, deseja continuar essa ação?
+                        Você clicou para <span className="font-bold">confirmar presença</span>, para continuar a ação, digite o código do convite:
+                        <br />
+                        <br />
+                        <span className="font-bold">Código:</span>
+                        <Input type="text" placeholder="XXXX" value={code} onChange={(e) => handleCode(e.target.value)} />
                       </>
                     }
-                    confirmLabel="Sim"
+                    confirmLabel="Confirmar"
                     onConfirm={() => handlePresenceAction(true)}
+                    onCancel={() => setCode('')}
                   >
                     <Button className="hover:bg-gray-600">Pode confirmar!</Button>
                   </ConfirmationDialog>
@@ -83,14 +101,16 @@ export default function Page() {
                     title="Atenção:"
                     description={
                       <>
-                        Você <span className="font-bold">não poderá comparecer</span>, informe o código para continuar sua ação.
+                        Você <span className="font-bold">não poderá comparecer</span>, para continuar a ação, digite o código do convite:
+                        <br />
                         <br />
                         <span className="font-bold">Código:</span>
-                        <Input type="text" value={guest.data.id} />
+                        <Input type="text" placeholder="XXXX" value={code} onChange={(e) => handleCode(e.target.value)} />
                       </>
                     }
-                    confirmLabel="Sim"
+                    confirmLabel="Confirmar"
                     onConfirm={() => handlePresenceAction()}
+                    onCancel={() => setCode('')}
                   >
                     <Button variant="outline" className="bg-transparent hover:bg-gray-200 border-black">Não posso ir</Button>
                   </ConfirmationDialog>

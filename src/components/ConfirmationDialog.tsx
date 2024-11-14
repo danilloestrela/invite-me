@@ -17,9 +17,10 @@ import {
     cancelLabel?: string;
     confirmLabel?: string;
     onConfirm?: () => void;
+    onCancel?: () => void;
   }
 
-  export function ConfirmationDialog({ children, title, description, cancelLabel, confirmLabel, onConfirm }: ConfirmationDialogProps) {
+  export function ConfirmationDialog({ children, title, description, cancelLabel, confirmLabel, onConfirm, onCancel }: ConfirmationDialogProps) {
     return (
       <AlertDialog>
         <AlertDialogTrigger asChild>
@@ -33,7 +34,7 @@ import {
             </AlertDialogDescription>}
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{cancelLabel || 'Cancelar'}</AlertDialogCancel>
+            <AlertDialogCancel onClick={onCancel}>{cancelLabel || 'Cancelar'}</AlertDialogCancel>
             <AlertDialogAction onClick={onConfirm}>{confirmLabel || 'Sim'}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
