@@ -32,7 +32,7 @@ export function NameCheckSkeleton() {
     );
 }
 
-export function ThankYouSkeleton() {
+export function AcceptedThankYouSkeleton() {
     return (
         <div className="flex flex-col gap-4">
             <Skeleton className={`w-80 h-10 ${skeletonStyles}`} />
@@ -45,3 +45,29 @@ export function ThankYouSkeleton() {
     );
 }
 
+export function DeclinedMessageSkeleton() {
+    return (
+        <div className="flex flex-col gap-4">
+            <Skeleton className={`w-96 h-10 ${skeletonStyles}`} />
+            <Skeleton className={`w-80 h-10 ${skeletonStyles}`} />
+            <Skeleton className={`w-full h-6 ${skeletonStyles}`} />
+            <Skeleton className={`w-24 h-6 ${skeletonStyles}`} />
+            <Skeleton className={`w-60 h-6 ${skeletonStyles}`} />
+            <Skeleton className={`w-96 h-6 ${skeletonStyles}`} />
+            <Skeleton className={`w-full h-12 ${skeletonStyles}`} />
+        </div>
+    );
+}
+
+export function DeclinedThankYouSkeleton() {
+    return (
+        <div className="flex flex-col gap-4">
+            <Skeleton className={`w-80 h-10 ${skeletonStyles}`} />
+            <Skeleton className={`w-96 h-10 ${skeletonStyles}`} />
+            <Skeleton className={`w-24 h-6 ${skeletonStyles}`} />
+            <Skeleton className={`w-24 h-6 ${skeletonStyles}`} />
+            <Skeleton className={`w-full h-12 ${skeletonStyles}`} />
+            <Skeleton className={`w-full h-12 ${skeletonStyles}`} />
+        </div>
+    );
+}

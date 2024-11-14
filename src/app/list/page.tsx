@@ -10,26 +10,25 @@ import { useRef } from "react";
 import Loading from "../loading";
 
 export default function Home() {
-  const passwordRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement | null>(null);
   const { toast } = useToast();
-  const { isAuthenticated, login, securePassword } = useAuth();
+  const { isAuthenticated, login } = useAuth();
   const { guests, isLoading } = useGuests(isAuthenticated);
 
 
   if (isLoading) return <Loading />;
 
   const handleLogin = async () => {
-    if (passwordRef.current && securePassword(passwordRef.current.value)) {
+    if (passwordRef.current) {
       await login({ username: 'admin', password: passwordRef.current.value });
     } else {
-      if (passwordRef.current) {
-        passwordRef.current.focus();
-        passwordRef.current.value = '';
+        if (passwordRef.current) {
+            (passwordRef.current as HTMLInputElement).value = '';
+        }
         toast({
           title: 'Senha inválida',
           description: 'Certifique-se que a senha é válida.',
         });
-      }
     }
   }
 

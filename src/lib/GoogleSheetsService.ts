@@ -25,11 +25,20 @@ enum GuestStateFields {
   seat = 'seat',
   code = 'code',
   status = 'status',
+  message = 'message',
   acknowledged = 'acknowledged',
   updated_at = 'updated_at',
   created_at = 'created_at',
 }
-
+/**
+ * status explanation:
+ * to_be_invited: convidado não confirmou presença
+ * attending: convidado confirmou presença
+ * not_attending: convidado não estará presente
+ * acknowledged: link de confirmação foi enviado ao convidado
+ * awaiting_accept: convidado ainda não aceitou o convite mesmo após abrir o link de confirmação ou alguém aceitou em seu lugar.
+ * rejected: convidado foi retirado da lista de convidados
+ */
 export enum GuestStatus {
   to_be_invited = 'to_be_invited',
   attending = 'attending',
@@ -52,19 +61,12 @@ export interface Guest {
   link?: string;
 }
 
-/**
- * status explanation:
- * to_be_invited: convidado não confirmou presença
- * attending: convidado confirmou presença
- * not_attending: convidado não estará presente
- * acknowledged: link de confirmação foi enviado ao convidado
- * awaiting_accept: convidado ainda não aceitou o convite mesmo após abrir o link de confirmação ou alguém aceitou em seu lugar.
- * rejected: convidado foi retirado da lista de convidados
- */
+
 export interface GuestState {
   guest_id: string;
   seat: string;
   code: string;
+  message: string;
   status: GuestStatus;
   acknowledged: string;
   updated_at: string;

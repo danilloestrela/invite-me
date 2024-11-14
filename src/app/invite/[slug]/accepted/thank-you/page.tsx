@@ -1,6 +1,6 @@
 'use client';
 import { Location } from '@/components/Location';
-import { ThankYouSkeleton } from '@/components/modules/invite/Skeletons';
+import { AcceptedThankYouSkeleton } from '@/components/modules/invite/Skeletons';
 import { PartyCountdown } from '@/components/PartyCountdown';
 import { useGuest } from '@/hooks/useGuest';
 import { GuestStatusEnum } from '@/lib/GoogleSheetsService';
@@ -17,7 +17,7 @@ export default function Page() {
   if (guest?.data && guest?.data?.status !== guestEnum.attending) {
     const redirectTo = checkNextStep({ slug: slug as string, status: guest?.data?.status as GuestStatusEnum });
     if (redirectTo) redirect(redirectTo);
-    return <ThankYouSkeleton />;
+    return <AcceptedThankYouSkeleton />;
   }
 
   if (!isLoading && guest?.data) {
@@ -49,5 +49,5 @@ export default function Page() {
     );
   }
 
-  return <ThankYouSkeleton />;
+  return <AcceptedThankYouSkeleton />;
 }
