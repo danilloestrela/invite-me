@@ -15,7 +15,7 @@ export default function Page() {
   const params = useParams();
   const { toast } = useToast();
   const slug = params.slug;
-  const { guest, isLoading, error, updateGuestMutation, guestEnum } = useGuest(slug as string);
+  const { guest, isLoading, updateGuestMutation, guestEnum } = useGuest(slug as string);
 
   const handlePresenceAction = (action: boolean = false) => {
     const status = action ? guestEnum.attending_name_check_pending : guestEnum.not_attending_message_pending;
@@ -40,20 +40,6 @@ export default function Page() {
     const redirectTo = checkNextStep({ slug: slug as string, status: guest.data?.status as GuestStatusEnum });
     if (redirectTo) redirect(redirectTo);
     return <InviteSkeleton />;
-  }
-
-  if (error) {
-    toast({
-      title: 'Erro ao carregar os dados do convidado',
-      description: 'Por favor, tente novamente atualizando a página ou entre em contato com Danillo Estrela.',
-    });
-    return (
-      <>
-        <div className="mb-4">
-          <h1 className="font-heading text-4xl"> Algo deu errado... Recarregue a página.</h1>
-        </div>
-      </>
-    );
   }
 
   if (!isLoading && !updateGuestMutation?.isPending && guest?.data) {

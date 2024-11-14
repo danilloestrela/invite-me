@@ -11,26 +11,14 @@ import { GuestStatusEnum } from '@/lib/GoogleSheetsService';
 import { checkNextStep } from '@/lib/StepService';
 import { useQueryClient } from '@tanstack/react-query';
 import { redirect, useParams } from 'next/navigation';
-
-const guestEnum: Partial<Record<GuestStatusEnum, GuestStatusEnum>> = {
-  attending: 'attending',
-  attending_name_check_pending: 'attending_name_check_pending',
-};
+import { useState } from 'react';
 
 export default function Page() {
+  const [code, setCode] = useState('');
   const params = useParams();
   const queryClient = useQueryClient();
   const slug = params.slug;
-  const { guest, isLoading, error, updateGuestMutation } = useGuest(slug as string);
-
-  const isAttendingNameCheckPending = guest?.data?.status === guestEnum.attending_name_check_pending;
-
-  if (!isAttendingNameCheckPending && guest?.data?.status && !updateGuestMutation.isPending) {
-    const redirectTo = checkNextStep({ slug: slug as string, status: guest?.data?.status as GuestStatusEnum });
-    if (redirectTo) redirect(redirectTo);
-    return <NameCheckSkeleton />;
-  }
-
+  const { guest, isLoading, updateGuestMutation, guestEnum } = useGuest(slug as string);
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     queryClient.setQueryData(['guest', slug], (oldData: GuestData | undefined) => {
       if (!oldData?.data) return oldData;
@@ -45,17 +33,31 @@ export default function Page() {
 
   const handleConfirmation = () => {
     if (!guest?.data?.name) return;
+    if (code.length !== 4 || code !== guest?.data?.code) {
+      toast({
+        title: 'Atenção!',
+        description: 'Digite o código corretamente.',
+      });
+      return;
+    }
     updateGuestMutation.mutate({ slug: slug as string, fields: [{ name: guest.data.name }, { status: guestEnum.attending }] });
   };
 
-  if (error) {
-    toast({
-      title: 'Erro ao carregar os dados do convidado',
-      description: 'Por favor, tente novamente atualizando a página ou entre em contato com Danillo Estrela.',
-    });
+  const handleCode = (inputCode: string) => {
+    if (inputCode.length > 4) return;
+    setCode(inputCode.toUpperCase().trim());
+  };
+
+  const isAttendingNameCheckPending = guest?.data?.status === guestEnum.attending_name_check_pending;
+
+  if (!isAttendingNameCheckPending && guest?.data?.status && !updateGuestMutation.isPending) {
+    const redirectTo = checkNextStep({ slug: slug as string, status: guest?.data?.status as GuestStatusEnum });
+    if (redirectTo) redirect(redirectTo);
+    return <NameCheckSkeleton />;
   }
 
-  if (!isLoading || !updateGuestMutation.isPending || !guest?.data) {
+
+  if (!isLoading && !updateGuestMutation?.isPending && guest?.data) {
     return (
       <>
         <div className="flex flex-col items-start justify-center gap-4 h-full">
@@ -79,9 +81,26 @@ export default function Page() {
             />
             <ConfirmationDialog
               title="Confira o seu nome. Está correto?"
-              description={<>O nome a confirmar é: <span className="font-bold">{guest.data?.name}</span></>}
+              description={
+                <>
+                  O nome a confirmar é: <span className="font-bold">{guest.data?.name}</span>
+                  <br />
+                  <br />
+                  <span className="text-sm text-gray-500">
+                    Digite o código do convite para confirmar:
+                  </span>
+                  <Input
+                    type="text"
+                    className="border-0 focus-visible:ring-0"
+                    placeholder="XXXX"
+                    value={code}
+                    onChange={(e) => handleCode(e.target.value)}
+                  />
+                </>
+              }
               confirmLabel="Tudo certo, pode confirmar!"
               onConfirm={handleConfirmation}
+              onCancel={() => setCode('')}
             >
               <Button className="hover:bg-gray-600">Confirmar</Button>
             </ConfirmationDialog>
