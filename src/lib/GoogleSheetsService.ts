@@ -284,7 +284,6 @@ export async function getCanConfirmGuests({ guests }: { guests: MergedGuest[] })
 
 async function getGuestCanConfirmObject(guest: MergedGuest, guests: MergedGuest[]): Promise<MergedGuest> {
   const guestWithConfirm = { ...guest };
-  console.log({ guestWithConfirm });
   if (typeof guestWithConfirm.can_confirm === 'string') {
     guestWithConfirm.can_confirm = guestWithConfirm.can_confirm.split(',');
   }
@@ -308,12 +307,12 @@ export async function appendToLog({ rows }: { rows: { [key: string]: string } })
   const formattedDate = format(new Date(), 'dd/MM/yyyy HH:mm:ss');
   const sheets = await initGoogleSheetWithGoogleApis();
   const logSheetName = process.env.GOOGLE_SHEET_GUEST_LOG as string;
-  console.log(rows)
   const theRows = {
     ...rows,
     created_at: formattedDate ,
     updated_at: formattedDate,
   }
+  console.log(`Logging: ${JSON.stringify(theRows)}`)
   // Transform rows into an array of arrays (as required by the Google Sheets API)
   const formattedRows = Object.values(theRows);
 

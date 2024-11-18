@@ -25,7 +25,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     const updateRes = res.filter((field: { [key: string]: string }) => !field.from_id);
     updatedGuest = await updateGuestField({ id: decodedId, fields: updateRes });
   } else {
-    console.log({res})
     updatedGuest = await updateGuestField({ id: decodedId, fields: res });
   }
 
