@@ -278,12 +278,13 @@ async function getFieldIndexAndRowIndex({ field, id, range }: { field: string, i
 
 export async function getCanConfirmGuests({ guests }: { guests: MergedGuest[] }): Promise<MergedGuest[]> {
   if (!guests) return [];
-  const guestsCanConfirm = guests.map(guest => getGuestCanConfirmObject(guest, guests));
+  const guestsCanConfirm = await Promise.all(guests.map(guest => getGuestCanConfirmObject(guest, guests)));
   return guestsCanConfirm;
 }
 
-function getGuestCanConfirmObject(guest: MergedGuest, guests: MergedGuest[]): MergedGuest {
+async function getGuestCanConfirmObject(guest: MergedGuest, guests: MergedGuest[]): Promise<MergedGuest> {
   const guestWithConfirm = { ...guest };
+  console.log({ guestWithConfirm });
   if (typeof guestWithConfirm.can_confirm === 'string') {
     guestWithConfirm.can_confirm = guestWithConfirm.can_confirm.split(',');
   }
@@ -291,9 +292,10 @@ function getGuestCanConfirmObject(guest: MergedGuest, guests: MergedGuest[]): Me
     return guestWithConfirm;
   }
   const guestsFound = guestWithConfirm.can_confirm.map((id) => guests.find((theGuest) => {
-    if (theGuest.id.trim() === (id as string).trim()) {
-      delete theGuest.can_confirm;
-      return theGuest as Omit<MergedGuest, 'can_confirm'>;
+    const thisGuest = { ...theGuest };
+    if (thisGuest.id.trim() === (id as string).trim()) {
+      delete thisGuest.can_confirm;
+      return thisGuest as Omit<MergedGuest, 'can_confirm'>;
     }
     return undefined;
   }));
