@@ -66,6 +66,7 @@ Aguardo sua confirmação e dos que puder confirmar!`;
           <TableHead className="w-[100px]">id</TableHead>
           <TableHead>Nome</TableHead>
           <TableHead>Whatsapp</TableHead>
+          <TableHead>Status</TableHead>
           <TableHead>Código</TableHead>
           <TableHead className="text-right">Link</TableHead>
         </TableRow>
@@ -76,6 +77,7 @@ Aguardo sua confirmação e dos que puder confirmar!`;
             <TableCell className="font-medium">{guest.id}</TableCell>
             <TableCell>{guest.name}</TableCell>
             <TableCell>{guest.whatsapp}</TableCell>
+            <TableCell><StatusCell status={guest.status} /></TableCell>
             <TableCell>{guest.code}</TableCell>
             <TableCell className="text-right">
               {guest.link && (
@@ -98,4 +100,10 @@ Aguardo sua confirmação e dos que puder confirmar!`;
       </TableBody>
     </Table>
   )
+}
+
+const StatusCell = ({ status }: { status: string }) => {
+  if (status === 'attending') return <span className="text-green-500 bg-green-100 rounded-md px-2 py-1">Irá a festa! 😄</span>
+  if (status === 'not_attending') return <span className="text-red-500 bg-red-100 rounded-md px-2 py-1">Não irá comparecer 😔</span>
+  return <span className="text-yellow-500 bg-yellow-100 rounded-md px-2 py-1">Ainda não confirmou! 🤔 ({status})</span>
 }
