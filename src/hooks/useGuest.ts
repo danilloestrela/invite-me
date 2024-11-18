@@ -13,16 +13,18 @@ export interface GuestHookReturn {
   updateGuestMutation: UseMutationResult<GuestData | null, Error, UpdateGuestFieldProps, unknown>;
 }
 
+export const guestEnum: Partial<Record<GuestStatusEnum, GuestStatusEnum>> = {
+  to_be_invited: 'to_be_invited',
+  attending: 'attending',
+  attending_name_check_pending: 'attending_name_check_pending',
+  not_attending_message_pending: 'not_attending_message_pending',
+  not_attending: 'not_attending',
+  acknowledged: 'acknowledged',
+  awaiting_accept: 'awaiting_accept',
+};
+
 export function useGuest(slug: string, enabled: boolean = true): GuestHookReturn {
-  const guestEnum: Partial<Record<GuestStatusEnum, GuestStatusEnum>> = {
-    to_be_invited: 'to_be_invited',
-    attending: 'attending',
-    attending_name_check_pending: 'attending_name_check_pending',
-    not_attending_message_pending: 'not_attending_message_pending',
-    not_attending: 'not_attending',
-    acknowledged: 'acknowledged',
-    awaiting_accept: 'awaiting_accept',
-  };
+
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { data: guest, isLoading, error } = useQuery<GuestData>({

@@ -10,6 +10,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { MergedGuest } from "@/lib/GoogleSheetsService";
 import { Check, Copy } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { Button } from "./ui/button";
 
@@ -17,6 +18,7 @@ import { Button } from "./ui/button";
 export function GuestListTable({ guests }: { guests: MergedGuest[] }) {
   const [copiedLinkId, setCopiedLinkId] = useState<string | null>(null);
   const { toast } = useToast();
+
 
   const handleCopyLink = ({ link, code, id }: { link: string, code: string, id: string }) => {
     if (!link) return;
@@ -60,13 +62,15 @@ Confirme sua presença pelo link: ${link}`;
             <TableCell>{guest.whatsapp}</TableCell>
             <TableCell>{guest.code}</TableCell>
             <TableCell className="text-right">
-              <div className="flex justify-end items-center gap-2">
-                <span className="text-sm">{guest.link}</span>
-                <Button onClick={() => handleCopyLink({ link: guest?.link || '', code: guest.code, id: guest.id })}>
-                  {copiedLinkId !== guest.id && <Copy className="w-4 h-4" />}
-                  {copiedLinkId === guest.id && <Check className="w-4 h-4 text-green-500" />}
-                </Button>
-              </div>
+              {guest.link && (
+                <div className="flex justify-end items-center gap-2">
+                  <Link href={guest.link} className="text-sm">{guest.link}</Link>
+                  <Button onClick={() => handleCopyLink({ link: guest?.link || '', code: guest.code, id: guest.id })}>
+                    {copiedLinkId !== guest.id && <Copy className="w-4 h-4" />}
+                    {copiedLinkId === guest.id && <Check className="w-4 h-4 text-green-500" />}
+                  </Button>
+                </div>
+              )}
             </TableCell>
           </TableRow>
         ))}

@@ -2,7 +2,7 @@ import { MergedGuest } from "@/lib/GoogleSheetsService";
 
 export interface UpdateGuestFieldProps {
     slug: string;
-    fields: Partial<{ [key in keyof MergedGuest]: string | number | Date }>[];
+    fields: Partial<{ [key in keyof MergedGuest]: string | number | Date } & { from_id?: string }>[];
 }
 
 export interface GuestData {

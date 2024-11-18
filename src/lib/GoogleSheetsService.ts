@@ -56,7 +56,7 @@ export interface Guest {
   name: string;
   description: string;
   whatsapp: string;
-  can_confirm: string[];
+  can_confirm?: string[] | string | Omit<MergedGuest, 'can_confirm'>[];
   relation: string;
   link?: string;
 }
@@ -161,7 +161,9 @@ export async function getMergedGuests(): Promise<MergedGuest[]> {
 
 export async function getGuests(): Promise<MergedGuest[]> {
   const mergedGuests = await getMergedGuests();
-  return mergedGuests;
+  const mergedGuestIncludingCanConfirm = await getCanConfirmGuests({ guests: mergedGuests });
+
+  return mergedGuestIncludingCanConfirm;
 }
 
 export async function getGuestById(id: string): Promise<MergedGuest | undefined> {
@@ -272,4 +274,60 @@ async function getFieldIndexAndRowIndex({ field, id, range }: { field: string, i
   const cell = `${String.fromCharCode(65 + fieldIndex)}${rowIndex + 1}`;
 
   return { rowIndex, fieldIndex, cell, sheets };
+}
+
+export async function getCanConfirmGuests({ guests }: { guests: MergedGuest[] }): Promise<MergedGuest[]> {
+  if (!guests) return [];
+  const guestsCanConfirm = guests.map(guest => getGuestCanConfirmObject(guest, guests));
+  return guestsCanConfirm;
+}
+
+function getGuestCanConfirmObject(guest: MergedGuest, guests: MergedGuest[]): MergedGuest {
+  const guestWithConfirm = { ...guest };
+  if (typeof guestWithConfirm.can_confirm === 'string') {
+    guestWithConfirm.can_confirm = guestWithConfirm.can_confirm.split(',');
+  }
+  if (!guestWithConfirm.can_confirm || guestWithConfirm.can_confirm.length === 0) {
+    return guestWithConfirm;
+  }
+  const guestsFound = guestWithConfirm.can_confirm.map((id) => guests.find((theGuest) => {
+    if (theGuest.id.trim() === (id as string).trim()) {
+      delete theGuest.can_confirm;
+      return theGuest as Omit<MergedGuest, 'can_confirm'>;
+    }
+    return undefined;
+  }));
+  guestWithConfirm.can_confirm = guestsFound.filter((guest) => guest !== undefined);
+  return guestWithConfirm;
+}
+
+
+export async function appendToLog({ rows }: { rows: { [key: string]: string } }) {
+  const formattedDate = format(new Date(), 'dd/MM/yyyy HH:mm:ss');
+  const sheets = await initGoogleSheetWithGoogleApis();
+  const logSheetName = process.env.GOOGLE_SHEET_GUEST_LOG as string;
+  console.log(rows)
+  const theRows = {
+    ...rows,
+    created_at: formattedDate ,
+    updated_at: formattedDate,
+  }
+  // Transform rows into an array of arrays (as required by the Google Sheets API)
+  const formattedRows = Object.values(theRows);
+
+  // Append rows to the sheet dynamically
+  const response = await sheets.spreadsheets.values.append({
+    spreadsheetId: process.env.GOOGLE_SPREADSHEET_ID as string,
+    range: logSheetName, // Dynamic range (sheet name only)
+    valueInputOption: 'RAW', // Insert values as-is
+    insertDataOption: 'INSERT_ROWS', // Always add rows at the end
+    requestBody: {
+      values: [formattedRows], // Wrap in an array to make it a 2D array
+    },
+  });
+  if (response.status !== 200) {
+    throw new Error('Failed to append rows to log');
+  }
+
+  return response.data;
 }

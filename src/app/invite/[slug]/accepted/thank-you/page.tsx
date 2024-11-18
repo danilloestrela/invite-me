@@ -1,9 +1,10 @@
 'use client';
 import { Location } from '@/components/Location';
+import CanConfirmFor from '@/components/modules/invite/CanConfirmFor';
 import { AcceptedThankYouSkeleton } from '@/components/modules/invite/Skeletons';
 import { PartyCountdown } from '@/components/PartyCountdown';
 import { useGuest } from '@/hooks/useGuest';
-import { GuestStatusEnum } from '@/lib/GoogleSheetsService';
+import { GuestStatusEnum, MergedGuest } from '@/lib/GoogleSheetsService';
 import { checkNextStep } from '@/lib/StepService';
 import { formatDistanceToNow, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -33,7 +34,7 @@ export default function Page() {
             </p>
             <div className="flex flex-col gap-2">
               <p className="text-sm text-gray-500">
-                {guest?.data?.name?.split(' ')[0]}, você aceitou o convite {formatDistanceToNow(parse(guest?.data?.updated_at, 'dd/MM/yyyy HH:mm:ss', new Date()), { addSuffix: true, locale: ptBR })}.
+                {guest?.data?.name}, você aceitou o convite {formatDistanceToNow(parse(guest?.data?.updated_at, 'dd/MM/yyyy HH:mm:ss', new Date()), { addSuffix: true, locale: ptBR })}.
               </p>
             </div>
             <Location
@@ -42,6 +43,12 @@ export default function Page() {
               address="Av. Gov. Flávio Ribeiro Coutinho, 220 - Lot. Oceania II, João Pessoa - PB, 58102-835"
               href="https://g.co/kgs/nJH1zfG"
             />
+            {guest?.data?.can_confirm && (
+              <div className="w-full">
+                <h3 className="text-lg font-bold">Você também pode confirmar para:</h3>
+                <CanConfirmFor guests={guest?.data?.can_confirm as MergedGuest[]} fromGuestId={guest?.data?.id} />
+              </div>
+            )}
             <PartyCountdown outerBoxClassName="w-full" targetDateString="January 31, 2025 00:00:00" />
           </div>
         )}
