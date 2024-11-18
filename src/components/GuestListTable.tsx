@@ -19,14 +19,21 @@ export function GuestListTable({ guests }: { guests: MergedGuest[] }) {
   const [copiedLinkId, setCopiedLinkId] = useState<string | null>(null);
   const { toast } = useToast();
 
+  const confirmLinksText = (can_confirm: Omit<MergedGuest, 'can_confirm'>[]) => {
+    const confirmLinks = can_confirm.map(person => `- ${person.name}: \n  -- Código do convite: ${person.code} \n  -- Link: ${person.link}`).join('\n');
+    if (confirmLinks.length === 0) return '';
+    return `Você também pode confirmar ou rejeitar a presença das pessoas da lista. Não precisa ir de link em link, apenas faça sua confirmação pelo seu link, ao final uma lista aparecerá para que possa fazer rapidamente esse procedimento.
+  Abaixo a lista de convidados que você pode confirmar:
+  ${confirmLinks}`
+  }
 
   const handleCopyLink = ({ link, code, id, can_confirm }: { link: string, code: string, id: string, can_confirm: Omit<MergedGuest, 'can_confirm'>[] | [] }) => {
     if (!link) return;
 
-    const confirmLinks = can_confirm.map(person => `- ${person.name}: \n  -- Código do convite: ${person.code} \n  -- Link: ${person.link}`).join('\n');
+
     const text = `🎓✨ Convite de Formatura ✨🎓
 
-Oi! Aqui é o Danillo e estou muito feliz em te convidar para minha festa de formatura em medicina! Vamos comemorar juntos esse momento especial!
+Oi! Aqui é Danillo e estou muito feliz em te convidar para minha festa de formatura em medicina! Vamos comemorar juntos esse momento especial!
 
 📅 Data: 31 de janeiro de 2025
 🕙 Hora: 22h
@@ -34,9 +41,7 @@ Oi! Aqui é o Danillo e estou muito feliz em te convidar para minha festa de for
 Seu código de convite é: ${code}
 Confirme sua presença pelo link: ${link}
 
-Você também pode confirmar ou rejeitar a presença das pessoas da lista. Não precisa ir de link em link, apenas faça sua confirmação pelo seu link, ao final uma lista aparecerá para que possa fazer rapidamente esse procedimento.
-Abaixo a lista de convidados que você pode confirmar:
-${confirmLinks}
+${confirmLinksText(can_confirm)}
 
 Por favor, note que devido à grande quantidade de convidados, é possível que não haja cadeiras para todos. Vamos priorizar os mais velhos. Apesar disso, estou tentando uma alternativa para as cadeiras.
 
