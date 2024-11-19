@@ -5,6 +5,7 @@ import { useGuest } from '@/hooks/useGuest';
 import { GuestStatusEnum, MergedGuest } from '@/lib/GoogleSheetsService';
 import { checkNextStep } from '@/lib/StepService';
 import { formatDistanceToNow, parse } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 import { ptBR } from 'date-fns/locale';
 import { redirect, useParams } from 'next/navigation';
 
@@ -19,7 +20,16 @@ export default function Page() {
     return <DeclinedThankYouSkeleton />;
   }
 
+  const getTimeAgo = () => {
+    const updatedAt = guest?.data?.updated_at;
+    const timezone = 'America/Recife';
+    const parsedDate = parse(updatedAt!, 'dd/MM/yyyy HH:mm:ss', new Date());
+    const zonedDate = toZonedTime(parsedDate, timezone);
+    return formatDistanceToNow(zonedDate, { addSuffix: true, locale: ptBR });
+  }
+
   if (!isLoading && guest?.data) {
+    const doneTimeAgo = getTimeAgo();
     return (guest?.data && (
       <div className="flex flex-col items-start justify-center gap-4 h-full">
         <h1 className="font-heading text-4xl"> Obrigado pela confirmação!</h1>
@@ -30,7 +40,7 @@ export default function Page() {
           <br />
         </p>
         <p className="text-sm text-gray-500">
-          Você realizou essa ação {formatDistanceToNow(parse(guest?.data?.updated_at, 'dd/MM/yyyy HH:mm:ss', new Date()), { addSuffix: true, locale: ptBR })}
+          Você realizou essa ação {doneTimeAgo}
         </p>
         {guest?.data?.can_confirm && (
           <div className="w-full">

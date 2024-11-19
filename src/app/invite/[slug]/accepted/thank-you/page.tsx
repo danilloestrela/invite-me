@@ -7,6 +7,7 @@ import { useGuest } from '@/hooks/useGuest';
 import { GuestStatusEnum, MergedGuest } from '@/lib/GoogleSheetsService';
 import { checkNextStep } from '@/lib/StepService';
 import { formatDistanceToNow, parse } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 import { ptBR } from 'date-fns/locale';
 import { redirect, useParams } from 'next/navigation';
 
@@ -20,8 +21,16 @@ export default function Page() {
     if (redirectTo) redirect(redirectTo);
     return <AcceptedThankYouSkeleton />;
   }
+  const getTimeAgo = () => {
+    const updatedAt = guest?.data?.updated_at;
+    const timezone = 'America/Recife';
+    const parsedDate = parse(updatedAt!, 'dd/MM/yyyy HH:mm:ss', new Date());
+    const zonedDate = toZonedTime(parsedDate, timezone);
+    return formatDistanceToNow(zonedDate, { addSuffix: true, locale: ptBR });
+  }
 
   if (!isLoading && guest?.data) {
+    const doneTimeAgo = getTimeAgo();
     return (
       <>
         {guest?.data && (
@@ -34,7 +43,7 @@ export default function Page() {
             </p>
             <div className="flex flex-col gap-2">
               <p className="text-sm text-gray-500">
-                {guest?.data?.name}, você aceitou o convite {formatDistanceToNow(parse(guest?.data?.updated_at, 'dd/MM/yyyy HH:mm:ss', new Date()), { addSuffix: true, locale: ptBR })}.
+                {guest?.data?.name}, você aceitou o convite {doneTimeAgo}.
               </p>
             </div>
             <Location
