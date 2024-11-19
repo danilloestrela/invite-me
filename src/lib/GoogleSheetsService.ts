@@ -1,12 +1,13 @@
 import { getTableInfo } from '@/helpers/googleapi/googleSheet';
 import { format } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 import { google, sheets_v4 } from 'googleapis';
 import { encodeBase64WithSalt, validatesForDatabaseRequiredFormat } from './utils';
 
 const SCOPES = [
   'https://www.googleapis.com/auth/spreadsheets',
 ];
-
+const timezone = 'America/Recife';
 const doc_id = process.env.GOOGLE_SPREADSHEET_ID as string;
 const guestListTableRange = process.env.GOOGLE_SHEET_GUESTS_LIST_RANGE as string;
 const guestStatesTableRange = process.env.GOOGLE_SHEET_GUEST_STATES_RANGE as string;
@@ -184,7 +185,8 @@ export async function updateGuestField({ id, fields }: UpdateGuestApiProps) {
 
   const guestUpdates: sheets_v4.Schema$ValueRange[] = [];
   const guestStateUpdates: sheets_v4.Schema$ValueRange[] = [];
-  const formattedDate = format(new Date(), 'dd/MM/yyyy HH:mm:ss');
+  const zonedDate = toZonedTime(new Date(), timezone);
+  const formattedDate = format(zonedDate, 'dd/MM/yyyy HH:mm:ss');
 
   for (const { field, value } of validatedFormat) {
     const rangeInfo = field in GuestFields ? guestListTableRange : guestStatesTableRange;
@@ -304,7 +306,8 @@ async function getGuestCanConfirmObject(guest: MergedGuest, guests: MergedGuest[
 
 
 export async function appendToLog({ rows }: { rows: { [key: string]: string } }) {
-  const formattedDate = format(new Date(), 'dd/MM/yyyy HH:mm:ss');
+  const zonedDate = toZonedTime(new Date(), timezone);
+  const formattedDate = format(zonedDate, 'dd/MM/yyyy HH:mm:ss');
   const sheets = await initGoogleSheetWithGoogleApis();
   const logSheetName = process.env.GOOGLE_SHEET_GUEST_LOG as string;
   const theRows = {
