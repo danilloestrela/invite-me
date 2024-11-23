@@ -152,11 +152,13 @@ export async function getMergedGuests(): Promise<MergedGuest[]> {
     const guestState = guestStateMap.get(theGuest.id); // Get matching state data by guest `id`
     const toMergeGuestState = { ...guestState, id: theGuest.id }
     delete toMergeGuestState.code;
+    delete toMergeGuestState.guest_id;
     delete toMergeGuestState.message;
     delete toMergeGuestState.seat;
     delete theGuest.relation;
     delete theGuest.whatsapp;
     delete theGuest.description;
+    delete theGuest.link;
     return {
       ...theGuest,
       ...toMergeGuestState,
@@ -303,7 +305,12 @@ async function getFieldIndexAndRowIndex({ field, id, range }: { field: string, i
 
 export async function getCanConfirmGuests({ guests }: { guests: MergedGuest[] }): Promise<MergedGuest[]> {
   if (!guests) return [];
-  const guestsCanConfirm = await Promise.all(guests.map(guest => getGuestCanConfirmObject(guest, guests)));
+  const guestsCanConfirm = await Promise.all(
+    guests.map(async (guest) => {
+      const updatedGuest = await getGuestCanConfirmObject(guest, guests);
+      return updatedGuest;
+    })
+  );
   return guestsCanConfirm;
 }
 
@@ -318,12 +325,20 @@ async function getGuestCanConfirmObject(guest: MergedGuest, guests: MergedGuest[
   const guestsFound = guestWithConfirm.can_confirm.map((id) => guests.find((theGuest) => {
     const thisGuest = { ...theGuest };
     if (thisGuest.id.trim() === (id as string).trim()) {
-      delete thisGuest.can_confirm;
       return thisGuest;
     }
-    return undefined;
+    return undefined
   }));
-  guestWithConfirm.can_confirm = guestsFound.filter((guest) => guest !== undefined);
+
+  const filterredGuests = guestsFound.filter((theGuest) => theGuest !== undefined);
+  const guestWithoutSomeThings = filterredGuests.map((theGuest) => {
+    if (theGuest) {
+      delete theGuest.can_confirm;
+      return theGuest;
+    }
+  }).filter((theGuest) => theGuest !== undefined);
+
+  guestWithConfirm.can_confirm = guestWithoutSomeThings ?? [];
   return guestWithConfirm;
 }
 
