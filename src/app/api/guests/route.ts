@@ -1,7 +1,7 @@
 import { getFullGuests, MergedGuest } from '@/lib/GoogleSheetsService';
 
 export interface ResponseGuests {
-  data: Omit<MergedGuest, 'code'>[];
+  data: MergedGuest[];
   total: number;
 }
 
