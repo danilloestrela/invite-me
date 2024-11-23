@@ -55,10 +55,10 @@ export type GuestStatusEnum = keyof typeof GuestStatus;
 export interface Guest {
   id: string;
   name: string;
-  description: string;
-  whatsapp: string;
+  description?: string;
+  whatsapp?: string;
   can_confirm?: string[] | string | Omit<MergedGuest, 'can_confirm' | 'code'>[];
-  relation: string;
+  relation?: string;
   link?: string;
 }
 
@@ -148,11 +148,17 @@ export async function getMergedGuests(): Promise<MergedGuest[]> {
   const guestStateMap = new Map(guestStates.map(state => [state.guest_id, state])); // Map by `id` for quick lookup
 
   const mergedGuests = guests.map(guest => {
-    const guestState = guestStateMap.get(guest.id); // Get matching state data by guest `id`
-    const toMergeGuestState = { ...guestState, id: guest.id }
-    delete (toMergeGuestState as Partial<MergedGuest>).code;
+    const theGuest = { ...guest };
+    const guestState = guestStateMap.get(theGuest.id); // Get matching state data by guest `id`
+    const toMergeGuestState = { ...guestState, id: theGuest.id }
+    delete toMergeGuestState.code;
+    delete toMergeGuestState.message;
+    delete toMergeGuestState.seat;
+    delete theGuest.relation;
+    delete theGuest.whatsapp;
+    delete theGuest.description;
     return {
-      ...guest,
+      ...theGuest,
       ...toMergeGuestState,
     };
   });
