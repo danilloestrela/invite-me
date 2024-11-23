@@ -1,4 +1,4 @@
-import { getFullGuests, getGuests, Guest, MergedGuest } from '@/lib/GoogleSheetsService';
+import { getFullGuests, MergedGuest } from '@/lib/GoogleSheetsService';
 
 export interface ResponseGuests {
   data: Omit<MergedGuest, 'code'>[];
