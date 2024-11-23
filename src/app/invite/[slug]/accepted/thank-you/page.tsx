@@ -48,7 +48,7 @@ export default function Page() {
             </div>
             <Location
               title="Domus Hall"
-              time="21 horas"
+              time="22 horas"
               address="Av. Gov. Flávio Ribeiro Coutinho, 220 - Lot. Oceania II, João Pessoa - PB, 58102-835"
               href="https://g.co/kgs/nJH1zfG"
             />
