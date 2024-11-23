@@ -18,7 +18,7 @@ export default function Page() {
   const params = useParams();
   const queryClient = useQueryClient();
   const slug = params.slug;
-  const { guest, isLoading, updateGuestMutation, guestEnum } = useGuest(slug as string);
+  const { guest, isLoading, updateGuestMutation, validateCodeMutation, guestEnum } = useGuest(slug as string);
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     queryClient.setQueryData(['guest', slug], (oldData: GuestData | undefined) => {
       if (!oldData?.data) return oldData;
@@ -31,16 +31,17 @@ export default function Page() {
     });
   };
 
-  const handleConfirmation = () => {
+  const handleConfirmation = async () => {
     if (!guest?.data?.name) return;
-    if (code.length !== 4 || code !== guest?.data?.code) {
+    const isCodeValid = await validateCodeMutation.mutateAsync({ guestId: slug as string, code });
+    if (!isCodeValid) {
       toast({
         title: 'Atenção!',
         description: 'Digite o código corretamente.',
       });
       return;
     }
-    updateGuestMutation.mutate({ slug: slug as string, fields: [{ name: guest.data.name }, { status: guestEnum.attending }] });
+    await updateGuestMutation.mutateAsync({ slug: slug as string, fields: [{ name: guest.data.name }, { status: guestEnum.attending }] });
   };
 
   const handleCode = (inputCode: string) => {

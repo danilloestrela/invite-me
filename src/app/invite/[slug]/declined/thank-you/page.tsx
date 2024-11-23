@@ -32,7 +32,7 @@ export default function Page() {
     const doneTimeAgo = getTimeAgo();
     return (guest?.data && (
       <div className="flex flex-col items-start justify-center gap-4 h-full">
-        <h1 className="font-heading text-4xl"> Obrigado pela confirmação!</h1>
+        <h1 className="font-heading text-4xl">Obrigado pela confirmação!</h1>
         <p className="text-justify">
           Entendo que não é sempre que podemos comparecer e agradeço por ter me confirmado com antecedência, {guest.data.name.split(' ')[0]}!
           <br />

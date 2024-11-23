@@ -42,7 +42,7 @@ interface CanConfirmStepperProps {
 
 function CanConfirmStepper({ guest, fromGuestId }: CanConfirmStepperProps) {
     const slug = encodeBase64WithSalt(guest.id);
-    const { updateGuestMutation } = useGuest(slug, false);
+    const { updateGuestMutation, validateCodeMutation } = useGuest(slug, false);
     const formMethods = useForm<CanConfirmStepperForms>({
         defaultValues: { code: '', message: '', name: guest.name },
     });
@@ -58,8 +58,9 @@ function CanConfirmStepper({ guest, fromGuestId }: CanConfirmStepperProps) {
         });
     }
 
-    const handleValidate = ({ toStep }: { toStep: StepType }) => {
-        if (formMethods.watch('code').trim() === '' || formMethods.watch('code').trim() !== guest.code.trim()) {
+    const handleValidate = async ({ toStep }: { toStep: StepType }) => {
+        const isCodeValid = await validateCodeMutation.mutateAsync({ guestId: slug as string, code: formMethods.watch('code') });
+        if (formMethods.watch('code').trim() === '' || !isCodeValid) {
             toast({
                 title: 'Código do convite inválido',
                 description: 'Por favor, digite o código correto do convite.',

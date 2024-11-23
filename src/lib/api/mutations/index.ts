@@ -32,3 +32,11 @@ export const authenticate = async ({username, password}: {username: string, pass
   }
   return fetchResponse.json();
 }
+
+export const validateCode = async ({guestId, code}: {guestId: string, code: string}): Promise<{data: boolean}> => {
+  const fetchResponse = await fetch(`/api/guests/${guestId}/code`, {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+  return fetchResponse.json();
+}

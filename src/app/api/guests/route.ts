@@ -1,13 +1,13 @@
-import { getGuests, Guest } from '@/lib/GoogleSheetsService';
+import { getFullGuests, getGuests, Guest, MergedGuest } from '@/lib/GoogleSheetsService';
 
 export interface ResponseGuests {
-  data: Guest[];
+  data: Omit<MergedGuest, 'code'>[];
   total: number;
 }
 
 export async function GET() {
   try {
-    const data = await getGuests();
+    const data = await getFullGuests();
     return Response.json({
       data,
       total: data.length,

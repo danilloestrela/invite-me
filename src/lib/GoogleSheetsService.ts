@@ -57,7 +57,7 @@ export interface Guest {
   name: string;
   description: string;
   whatsapp: string;
-  can_confirm?: string[] | string | Omit<MergedGuest, 'can_confirm'>[];
+  can_confirm?: string[] | string | Omit<MergedGuest, 'can_confirm' | 'code'>[];
   relation: string;
   link?: string;
 }
@@ -65,8 +65,8 @@ export interface Guest {
 
 export interface GuestState {
   guest_id: string;
-  seat: string;
-  code: string;
+  seat?: string;
+  code?: string;
   message: string;
   status: GuestStatus;
   acknowledged: string;
@@ -150,6 +150,7 @@ export async function getMergedGuests(): Promise<MergedGuest[]> {
   const mergedGuests = guests.map(guest => {
     const guestState = guestStateMap.get(guest.id); // Get matching state data by guest `id`
     const toMergeGuestState = { ...guestState, id: guest.id }
+    delete (toMergeGuestState as Partial<MergedGuest>).code;
     return {
       ...guest,
       ...toMergeGuestState,
@@ -159,12 +160,28 @@ export async function getMergedGuests(): Promise<MergedGuest[]> {
   return mergedGuests as MergedGuest[];
 }
 
-
 export async function getGuests(): Promise<MergedGuest[]> {
   const mergedGuests = await getMergedGuests();
   const mergedGuestIncludingCanConfirm = await getCanConfirmGuests({ guests: mergedGuests });
 
   return mergedGuestIncludingCanConfirm;
+}
+
+export async function getFullGuests(): Promise<MergedGuest[]> {
+  const guests = await getGuestsList(); // data from Lista Oficial
+  const guestStates = await getGuestStates(); // data from guest_states, now an array of objects
+
+  const guestStateMap = new Map(guestStates.map(state => [state.guest_id, state])); // Map by `id` for quick lookup
+
+  const mergedGuests = guests.map(guest => {
+    const guestState = guestStateMap.get(guest.id); // Get matching state data by guest `id`
+    const toMergeGuestState = { ...guestState, id: guest.id }
+    return {
+      ...guest,
+      ...toMergeGuestState,
+    };
+  });
+  return mergedGuests as MergedGuest[];
 }
 
 export async function getGuestById(id: string): Promise<MergedGuest | undefined> {
@@ -296,7 +313,7 @@ async function getGuestCanConfirmObject(guest: MergedGuest, guests: MergedGuest[
     const thisGuest = { ...theGuest };
     if (thisGuest.id.trim() === (id as string).trim()) {
       delete thisGuest.can_confirm;
-      return thisGuest as Omit<MergedGuest, 'can_confirm'>;
+      return thisGuest;
     }
     return undefined;
   }));
@@ -334,4 +351,11 @@ export async function appendToLog({ rows }: { rows: { [key: string]: string } })
   }
 
   return response.data;
+}
+
+export async function validateCodeFromGuestId(guestId: string, code: string) {
+  const guestStates = await getGuestStates();
+  const guestState = guestStates.find((state) => state.guest_id === guestId);
+  if (!guestState) throw new Error('Guest state not found');
+  return guestState.code === code;
 }

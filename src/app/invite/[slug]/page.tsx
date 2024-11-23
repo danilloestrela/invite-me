@@ -15,11 +15,19 @@ export default function Page() {
   const params = useParams();
   const { toast } = useToast();
   const slug = params.slug;
-  const { guest, isLoading, updateGuestMutation, guestEnum } = useGuest(slug as string);
+  const { guest, isLoading, updateGuestMutation, validateCodeMutation, guestEnum } = useGuest(slug as string);
 
-  const handlePresenceAction = (action: boolean = false) => {
+  const handlePresenceAction = async (action: boolean = false) => {
+    if (!guest?.data?.id) {
+      toast({
+        title: 'Erro!',
+        description: 'ID do convidado não encontrado.',
+      });
+      return;
+    }
     const status = action ? guestEnum.attending_name_check_pending : guestEnum.not_attending_message_pending;
-    if (code.length !== 4 || code !== guest?.data?.code) {
+    const isCodeValid = await validateCodeMutation.mutateAsync({ guestId: slug as string, code });
+    if (!isCodeValid) {
       toast({
         title: 'Atenção!',
         description: 'Digite o código corretamente.',

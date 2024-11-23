@@ -78,14 +78,14 @@ Aguardo sua confirmação e dos que puder confirmar!`;
             <TableCell>{guest.name}</TableCell>
             <TableCell>{guest.whatsapp}</TableCell>
             <TableCell><StatusCell status={guest.status} /></TableCell>
-            <TableCell>{guest.code}</TableCell>
+            <TableCell>{guest.code ?? ''}</TableCell>
             <TableCell className="text-right">
               {guest.link && (
                 <div className="flex justify-end items-center gap-2">
                   <Link href={guest.link} className="text-sm">{guest.link}</Link>
                   <Button onClick={() => handleCopyLink({
                     link: guest?.link || '',
-                    code: guest.code,
+                    code: guest.code ?? '',
                     id: guest.id,
                     can_confirm: guest.can_confirm as Omit<MergedGuest, 'can_confirm'>[] || []
                   })}>

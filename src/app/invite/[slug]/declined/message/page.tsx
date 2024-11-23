@@ -20,7 +20,7 @@ export default function Page() {
   const slug = params.slug;
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { guest, updateGuestMutation, guestEnum, isLoading } = useGuest(slug as string);
+  const { guest, updateGuestMutation, guestEnum, validateCodeMutation, isLoading } = useGuest(slug as string);
 
   const isDeclinedMessagePending = guest?.data?.status === guestEnum.not_attending_message_pending;
 
@@ -47,8 +47,18 @@ export default function Page() {
     });
   };
 
-  const handleMessageSubmit = () => {
+  const handleMessageSubmit = async () => {
     if (!guest?.data?.message) return;
+
+    const isCodeValid = await validateCodeMutation.mutateAsync({ guestId: slug as string, code });
+    if (!isCodeValid) {
+      toast({
+        title: 'Atenção!',
+        description: 'Digite o código corretamente.',
+      });
+      return;
+    }
+
     if (guest?.data?.message.length < 25) {
       toast({
         title: 'Atenção!',

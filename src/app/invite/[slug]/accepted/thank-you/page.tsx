@@ -35,7 +35,7 @@ export default function Page() {
       <>
         {guest?.data && (
           <div className="flex flex-col items-start justify-center gap-4 h-full">
-            <h1 className="font-heading text-4xl"> Obrigado pela confirmação! <br /> Te aguardo 31 de janeiro de 2025</h1>
+            <h1 className="font-heading text-4xl">Obrigado pela confirmação! <br /> Te aguardo 31 de janeiro de 2025</h1>
             <p className="text-justify">
               Será <span className="font-bold"> um prazer te receber nesta comemoração!</span>
               <br />
