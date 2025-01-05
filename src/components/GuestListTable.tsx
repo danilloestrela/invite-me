@@ -20,6 +20,7 @@ export function GuestListTable({ guests }: { guests: MergedGuest[] }) {
   const { toast } = useToast();
 
   const confirmLinksText = (can_confirm: Omit<MergedGuest, 'can_confirm'>[]) => {
+    if (can_confirm?.length === 0) return '';
     const confirmLinks = can_confirm.map(person => `- ${person.name}: \n  -- Código do convite: ${person.code} \n  -- Link: ${person.link}`).join('\n');
     if (confirmLinks.length === 0) return '';
     return `Você também pode confirmar ou rejeitar a presença das pessoas da lista. Não precisa ir de link em link, apenas faça sua confirmação pelo seu link, ao final uma lista aparecerá para que possa fazer rapidamente esse procedimento.
@@ -45,7 +46,7 @@ ${confirmLinksText(can_confirm)}
 
 Por favor, note que devido à grande quantidade de convidados, é possível que não haja cadeiras para todos. Vamos priorizar os mais velhos. Apesar disso, estou tentando uma alternativa para as cadeiras.
 
-Aguardo sua confirmação e dos que puder confirmar!`;
+Aguardo sua confirmação ${can_confirm.length > 0 ? 'e dos que puder confirmar!' : '!'}`;
 
     navigator.clipboard.writeText(text).then(() => {
       setCopiedLinkId(id);
