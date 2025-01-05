@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useGuests } from "@/hooks/useGuests";
-import { useRef } from "react";
 import Loading from "../loading";
 
 export default function Home() {
