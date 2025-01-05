@@ -10,7 +10,6 @@ import { useRef } from "react";
 import Loading from "../loading";
 
 export default function Home() {
-  const passwordRef = useRef<HTMLInputElement | null>(null);
   const { toast } = useToast();
   const { isAuthenticated, login } = useAuth();
   const { guests, isLoading } = useGuests(isAuthenticated);
@@ -18,17 +17,20 @@ export default function Home() {
 
   if (isLoading) return <Loading />;
 
-  const handleLogin = async () => {
-    if (passwordRef.current) {
-      await login({ username: 'admin', password: passwordRef.current.value });
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+    const password = formData.get('password') as string;
+
+    if (password) {
+      await login({ username: 'admin', password });
     } else {
-        if (passwordRef.current) {
-            (passwordRef.current as HTMLInputElement).value = '';
-        }
-        toast({
-          title: 'Senha inválida',
-          description: 'Certifique-se que a senha é válida.',
-        });
+      toast({
+        title: 'Senha inválida',
+        description: 'Certifique-se que a senha é válida.',
+      });
+      e.currentTarget.reset();
     }
   }
 
@@ -36,15 +38,15 @@ export default function Home() {
     return (
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start h-full p-10">
         {!isAuthenticated && (
-          <div className="bg-white border-black border-[1px] rounded flex w-full p-2">
+          <form className="bg-white border-black border-[1px] rounded flex w-full p-2" onSubmit={handleLogin}>
             <Input
-              type="text"
+              type="password"
+              name="password"
               className='border-0 focus-visible:ring-0'
               placeholder="Senha"
-              ref={passwordRef}
             />
-            <Button className="hover:bg-gray-600" onClick={handleLogin}>Confirmar</Button>
-          </div>
+            <Button className="hover:bg-gray-600" type="submit">Confirmar</Button>
+          </form>
         )}
         {isAuthenticated && guests?.data && (
           <>
