@@ -1,5 +1,3 @@
-import { decodeBase64WithSalt } from "@/lib/utils";
-
 export async function POST(request: Request) {
   const res = await request.json();
   const { username, password } = res;
