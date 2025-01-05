@@ -20,8 +20,11 @@ export function GuestListTable({ guests }: { guests: MergedGuest[] }) {
   const { toast } = useToast();
 
   const confirmLinksText = (can_confirm: Omit<MergedGuest, 'can_confirm'>[]) => {
-    if (can_confirm?.length === 0) return '';
-    const confirmLinks = can_confirm.map(person => `- ${person.name}: \n  -- Código do convite: ${person.code} \n  -- Link: ${person.link}`).join('\n');
+    let canConfirm = can_confirm
+    if (typeof can_confirm === 'string') {
+      canConfirm = [can_confirm]
+    }
+    const confirmLinks = canConfirm.map(person => `- ${person.name}: \n  -- Código do convite: ${person.code} \n  -- Link: ${person.link}`).join('\n');
     if (confirmLinks.length === 0) return '';
     return `Você também pode confirmar ou rejeitar a presença das pessoas da lista. Não precisa ir de link em link, apenas faça sua confirmação pelo seu link, ao final uma lista aparecerá para que possa fazer rapidamente esse procedimento.
   Abaixo a lista de convidados que você pode confirmar:
@@ -83,7 +86,7 @@ Aguardo sua confirmação ${can_confirm.length > 0 ? 'e dos que puder confirmar!
             <TableCell className="text-right">
               {guest.link && (
                 <div className="flex justify-end items-center gap-2">
-                  <Link href={guest.link} className="text-sm">{guest.link}</Link>
+                  <Link href={guest.link} className="text-sm" target="_blank">{guest.link}</Link>
                   <Button onClick={() => handleCopyLink({
                     link: guest?.link || '',
                     code: guest.code ?? '',

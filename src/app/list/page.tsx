@@ -12,22 +12,23 @@ export default function Home() {
   const { toast } = useToast();
   const { isAuthenticated, login } = useAuth();
   const { guests, isLoading } = useGuests(isAuthenticated);
-
-
   if (isLoading) return <Loading />;
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
-    const password = formData.get('password') as string;
+    const data = {
+      password: formData.get('password') as string,
+      username: formData.get('username') as string
+    };
 
-    if (password) {
-      await login({ username: 'admin', password });
+    if (data.password && data.username) {
+      await login(data);
     } else {
       toast({
-        title: 'Senha inválida',
-        description: 'Certifique-se que a senha é válida.',
+        title: 'Dados inválidos',
+        description: 'Certifique-se que a senha e o usuário são válidos.',
       });
       e.currentTarget.reset();
     }
@@ -37,15 +38,25 @@ export default function Home() {
     return (
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start h-full p-10">
         {!isAuthenticated && (
-          <form className="bg-white border-black border-[1px] rounded flex w-full p-2" onSubmit={handleLogin}>
-            <Input
-              type="password"
-              name="password"
-              className='border-0 focus-visible:ring-0'
-              placeholder="Senha"
-            />
-            <Button className="hover:bg-gray-600" type="submit">Confirmar</Button>
-          </form>
+          <div className="flex flex-col gap-2 w-full h-full items-center justify-center">
+            <form className="bg-white border-black border-[1px] rounded flex flex-col gap-2 w-full p-6 max-w-sm" onSubmit={handleLogin}>
+              <Input
+                type="text"
+                name="username"
+                className='border-0 focus-visible:ring-0'
+                placeholder="Usuário"
+                autoComplete="current-username"
+              />
+              <Input
+                type="password"
+                name="password"
+                className='border-0 focus-visible:ring-0'
+                placeholder="Senha"
+                autoComplete="current-password"
+              />
+              <Button className="hover:bg-gray-600" type="submit">Confirmar</Button>
+            </form>
+          </div>
         )}
         {isAuthenticated && guests?.data && (
           <>
@@ -55,6 +66,9 @@ export default function Home() {
             </div>
           </>
         )}
+        {
+          isAuthenticated && !guests?.data && <Loading />
+        }
       </main>
     );
   }

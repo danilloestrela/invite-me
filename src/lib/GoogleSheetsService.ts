@@ -140,12 +140,12 @@ export async function getGuestsList(): Promise<Guest[]> {
   return guestsWithLink;
 }
 
+/**
+ * Merged guests are the states + guest list
+ */
 export interface MergedGuest extends Guest, Omit<GuestState, 'guest_id'> { }
-export async function getMergedGuests(): Promise<MergedGuest[]> {
-  const guests = await getGuestsList(); // data from Lista Oficial
-  const guestStates = await getGuestStates(); // data from guest_states, now an array of objects
-
-  const guestStateMap = new Map(guestStates.map(state => [state.guest_id, state])); // Map by `id` for quick lookup
+export async function getMergedPublicGuests(): Promise<MergedGuest[]> {
+  const { guests, guestStateMap } = await getMergedGuests();
 
   const mergedGuests = guests.map(guest => {
     const theGuest = { ...guest };
@@ -168,19 +168,29 @@ export async function getMergedGuests(): Promise<MergedGuest[]> {
   return mergedGuests as MergedGuest[];
 }
 
+export async function getMergedGuests(): Promise<{ guests: Guest[], guestStateMap: Map<string, GuestState>}> {
+  const guests = await getGuestsList(); // data from Lista Oficial
+  const guestStates = await getGuestStates(); // data from guest_states, now an array of objects
+
+  const guestStateMap = new Map(guestStates.map(state => [state.guest_id, state])); // Map by `id` for quick lookup
+  return { guests, guestStateMap };
+}
+
+/**
+ * This method returns public validated guest info for the users
+ */
 export async function getGuests(): Promise<MergedGuest[]> {
-  const mergedGuests = await getMergedGuests();
+  const mergedGuests = await getMergedPublicGuests();
   const mergedGuestIncludingCanConfirm = await getCanConfirmGuests({ guests: mergedGuests });
 
   return mergedGuestIncludingCanConfirm;
 }
 
+/**
+ * This function returns the merged guests with the can_confirm field and states
+ */
 export async function getFullGuests(): Promise<MergedGuest[]> {
-  const guests = await getGuestsList(); // data from Lista Oficial
-  const guestStates = await getGuestStates(); // data from guest_states, now an array of objects
-
-  const guestStateMap = new Map(guestStates.map(state => [state.guest_id, state])); // Map by `id` for quick lookup
-
+  const { guests, guestStateMap } = await getMergedGuests();
   const mergedGuests = guests.map(guest => {
     const guestState = guestStateMap.get(guest.id); // Get matching state data by guest `id`
     const toMergeGuestState = { ...guestState, id: guest.id }
@@ -188,8 +198,11 @@ export async function getFullGuests(): Promise<MergedGuest[]> {
       ...guest,
       ...toMergeGuestState,
     };
-  });
-  return mergedGuests as MergedGuest[];
+  }) as MergedGuest[];
+
+  const mergedGuestIncludingCanConfirm = await getCanConfirmGuests({ guests: mergedGuests });
+
+  return mergedGuestIncludingCanConfirm as MergedGuest[];
 }
 
 export async function getGuestById(id: string): Promise<MergedGuest | undefined> {
