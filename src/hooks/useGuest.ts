@@ -1,16 +1,15 @@
 'use client';
-import { fetchGuest } from '@/lib/api/getters';
-import { GuestData, updateGuestField, UpdateGuestFieldProps, validateCode } from '@/lib/api/mutations';
+import { GuestsApi } from '@/lib/api';
 import { GuestStatusEnum } from '@/lib/GoogleSheetsService';
 import { useMutation, UseMutationResult, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from './use-toast';
 
 export interface GuestHookReturn {
-  guest: GuestData;
+  guest: GuestsApi.GuestsSingleData;
   isLoading: boolean;
   error: Error | null;
   guestEnum: Partial<Record<GuestStatusEnum, GuestStatusEnum>>;
-  updateGuestMutation: UseMutationResult<GuestData | null, Error, UpdateGuestFieldProps, unknown>;
+  updateGuestMutation: UseMutationResult<GuestData | null, Error, GuestsApi.UpdateGuestFieldProps, unknown>;
   validateCodeMutation: UseMutationResult<{data: boolean}, Error, {guestId: string, code: string}, unknown>;
 }
 export const guestEnum: Partial<Record<GuestStatusEnum, GuestStatusEnum>> = {
@@ -27,21 +26,21 @@ export function useGuest(slug: string, enabled: boolean = true): GuestHookReturn
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { data: guest, isLoading, error } = useQuery<GuestData>({
+  const { data: guest, isLoading, error } = useQuery<GuestsApi.GuestsSingleData>({
     queryKey: ['guest', slug],
-    queryFn: () => fetchGuest(slug),
-    initialData: { data: null } as GuestData,
+    queryFn: () => GuestsApi.guests.single(slug),
+    initialData: { data: null } as GuestsApi.GuestsSingleData,
     enabled,
   });
 
-  const updateGuestMutation = useMutation<GuestData | null, Error, UpdateGuestFieldProps>({
-    mutationFn: (data: UpdateGuestFieldProps) => updateGuestField(data),
+  const updateGuestMutation = useMutation<GuestsApi.GuestsSingleData | null, Error, GuestsApi.UpdateGuestFieldProps>({
+    mutationFn: (data: GuestsApi.UpdateGuestFieldProps) => GuestsApi.guests.update(data),
     onSuccess: (updatedData) => {
       toast({
         title: 'Sucesso!',
         description: 'Convidado atualizado com sucesso!',
       });
-      queryClient.setQueryData(['guest', slug], (oldData: GuestData | undefined) => {
+      queryClient.setQueryData(['guest', slug], (oldData: GuestsApi.GuestsSingleData | undefined) => {
         if (!updatedData?.data) return oldData;
         const newData = {
           data: {
@@ -61,7 +60,7 @@ export function useGuest(slug: string, enabled: boolean = true): GuestHookReturn
   });
 
   const validateCodeMutation = useMutation<{data: boolean}, Error, {guestId: string, code: string}>({
-    mutationFn: ({guestId, code}) => validateCode({guestId, code}),
+    mutationFn: ({guestId, code}) => GuestsApi.guests.validateCode({guestId, code}),
   });
 
   return { guest, isLoading, error, updateGuestMutation, validateCodeMutation, guestEnum };

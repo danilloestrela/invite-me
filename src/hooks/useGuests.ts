@@ -1,18 +1,18 @@
 'use client';
-import { fetchGuests, GuestsData } from '@/lib/api/getters'; // Assume this function fetches a list of guests
+import { GuestsApi } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
 
 export interface GuestsHookReturn {
-  guests: GuestsData | null;
+  guests: GuestsApi.GuestsData | null;
   isLoading: boolean;
   error: Error | null;
 }
 
 export function useGuests(authenticated: boolean): GuestsHookReturn {
-  const { data: guests, isLoading, error } = useQuery<GuestsData>({
+  const { data: guests, isLoading, error } = useQuery<GuestsApi.GuestsData>({
     queryKey: ['guests'],
-    queryFn: fetchGuests,
-    initialData: { data: null } as GuestsData,
+    queryFn: GuestsApi.guests.list,
+    initialData: { data: null } as GuestsApi.GuestsData,
     enabled: authenticated,
   });
 

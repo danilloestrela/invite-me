@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { authenticate } from '@/lib/api/mutations';
+import { AuthApi } from '@/lib/api';
 import { toast } from './use-toast';
 
 const authService = {
@@ -23,7 +23,7 @@ export function useAuth() {
 
   const login = async ({ username, password, callback }: { username: string, password: string, callback?: () => void}) => {
     try {
-      await authenticate({ username, password });
+      await AuthApi.auth.authenticate({ username, password });
       setIsAuthenticated(true);
       callback?.();
     } catch (error) {
