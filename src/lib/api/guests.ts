@@ -2,6 +2,8 @@ import { MergedGuest } from "@/lib/GoogleSheetsService";
 
 export interface GuestsData {
     data: MergedGuest[] | null;
+    page: number;
+    totalPages: number;
 }
 
 export interface GuestsSingleData {
@@ -15,8 +17,8 @@ export interface UpdateGuestFieldProps {
 
 
 export const guests = {
-    list: async (): Promise<GuestsData> => {
-        return fetch('/api/guests').then((res) => res.json());
+    list: async ({ page = 1, pageSize = 20 }: { page?: number, pageSize?: number }): Promise<GuestsData> => {
+        return fetch(`/api/guests?page=${page}&pageSize=${pageSize}`).then((res) => res.json());
     },
     single: async (slug: string): Promise<GuestsSingleData> => {
         return fetch(`/api/guests/${slug}`).then((res) => res.json());

@@ -1,5 +1,6 @@
 'use client'
 
+import { GuestListPagination } from "@/components/GuestListPagination";
 import { GuestListTable } from "@/components/GuestListTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,7 @@ import Loading from "../loading";
 export default function Home() {
   const { toast } = useToast();
   const { isAuthenticated, login } = useAuth();
-  const { guests, isLoading } = useGuests(isAuthenticated);
+  const { guests, isLoading, gotoPageMutation } = useGuests(isAuthenticated);
   if (isLoading) return <Loading />;
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -32,6 +33,10 @@ export default function Home() {
       });
       e.currentTarget.reset();
     }
+  }
+
+  const handlePageChange = (page: number) => {
+    gotoPageMutation.mutate(page);
   }
 
   if (!isLoading) {
@@ -61,9 +66,19 @@ export default function Home() {
         {isAuthenticated && guests?.data && (
           <>
             <h1 className="text-4xl font-sans font-bold">Lista de convidados:</h1>
+            <GuestListPagination
+              page={guests.page}
+              totalPages={guests.totalPages}
+              onPageChange={handlePageChange}
+            />
             <div className="bg-white rounded w-full overflow-x-auto">
               <GuestListTable guests={guests.data} />
             </div>
+            <GuestListPagination
+              page={guests.page}
+              totalPages={guests.totalPages}
+              onPageChange={handlePageChange}
+            />
           </>
         )}
         {

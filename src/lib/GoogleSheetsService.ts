@@ -205,11 +205,19 @@ export async function getFullGuests(): Promise<MergedGuest[]> {
   return mergedGuestIncludingCanConfirm as MergedGuest[];
 }
 
-export async function getFullGuestsPaginated({ page, pageSize }: { page: number, pageSize: number }): Promise<MergedGuest[]> {
+interface FullGuestsPaginatedResponse {
+  guests: MergedGuest[];
+  page: number;
+  totalPages: number;
+}
+
+export async function getFullGuestsPaginated({ page, pageSize }: { page: number, pageSize: number }): Promise<FullGuestsPaginatedResponse> {
   const guests = await getFullGuests();
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  return guests.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(guests.length / pageSize);
+  const currentGuestsForPage = guests.slice(startIndex, endIndex);
+  return { guests: currentGuestsForPage, page, totalPages };
 }
 
 export async function getGuestById(id: string): Promise<MergedGuest | undefined> {
