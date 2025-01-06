@@ -15,7 +15,7 @@ import {
     ellipsisNumberShow?: number;
   }
 
-  export const GuestListPagination = ({page, totalPages, onPageChange, ellipsisNumberShow = 3}: GuestListPaginationProps) => {
+  export const GuestListPagination = ({ page, totalPages, onPageChange, ellipsisNumberShow = 3 }: GuestListPaginationProps) => {
 
     const handlePageChange = (pageNumber: number) => {
         if(pageNumber < 1 || pageNumber > totalPages) return;
