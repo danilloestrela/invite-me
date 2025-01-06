@@ -9,7 +9,7 @@ export interface GuestHookReturn {
   isLoading: boolean;
   error: Error | null;
   guestEnum: Partial<Record<GuestStatusEnum, GuestStatusEnum>>;
-  updateGuestMutation: UseMutationResult<GuestData | null, Error, GuestsApi.UpdateGuestFieldProps, unknown>;
+  updateGuestMutation: UseMutationResult<GuestsApi.GuestsSingleData | null, Error, GuestsApi.UpdateGuestFieldProps, unknown>;
   validateCodeMutation: UseMutationResult<{data: boolean}, Error, {guestId: string, code: string}, unknown>;
 }
 export const guestEnum: Partial<Record<GuestStatusEnum, GuestStatusEnum>> = {

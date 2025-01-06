@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { useGuest } from '@/hooks/useGuest';
-import { GuestData } from '@/lib/api/mutations';
+import { GuestsApi } from '@/lib/api';
 import { GuestStatusEnum } from '@/lib/GoogleSheetsService';
 import { checkNextStep } from '@/lib/StepService';
 import { useQueryClient } from '@tanstack/react-query';
@@ -20,7 +20,7 @@ export default function Page() {
   const slug = params.slug;
   const { guest, isLoading, updateGuestMutation, validateCodeMutation, guestEnum } = useGuest(slug as string);
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    queryClient.setQueryData(['guest', slug], (oldData: GuestData | undefined) => {
+    queryClient.setQueryData(['guest', slug], (oldData: GuestsApi.GuestsSingleData | undefined) => {
       if (!oldData?.data) return oldData;
       return {
         data: {

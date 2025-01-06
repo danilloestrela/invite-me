@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useGuest } from '@/hooks/useGuest';
-import { GuestData } from '@/lib/api/mutations';
+import { GuestsApi } from '@/lib/api';
 import { GuestStatusEnum } from '@/lib/GoogleSheetsService';
 import { checkNextStep } from '@/lib/StepService';
 import { useQueryClient } from '@tanstack/react-query';
@@ -36,7 +36,7 @@ export default function Page() {
   };
 
   const handleMessageChange = (message: string) => {
-    queryClient.setQueryData(['guest', slug], (oldData: GuestData | undefined) => {
+    queryClient.setQueryData(['guest', slug], (oldData: GuestsApi.GuestsSingleData | undefined) => {
       if (!oldData?.data) return oldData;
       return {
         data: {
