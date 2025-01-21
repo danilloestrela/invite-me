@@ -42,12 +42,18 @@ Oi! Aqui é Danillo e estou muito feliz em te convidar para minha festa de forma
 📅 Data: 31 de janeiro de 2025
 🕙 Hora: 22h
 📍 Local: Domus Hall
+- Dress Code:
+Homens: terno ou camisa social com blazer
+Mulheres: vestido, saia ou conjunto social (não necessariamente longo, mas elegante)
+- Atenção mulheres: não usar vestido na cor verde (cor das formandas)
+- Atenção homens: não usar smoking, gravata verde, gravata borboleta. Preferir cores que não sejam verdes. (cor dos formandos em medicina)
+----
 Seu código de convite é: ${code}
 Confirme sua presença pelo link: ${link}
+----
+`+ confirmLinksText(can_confirm) +`
 
-${confirmLinksText(can_confirm)}
-
-Por favor, note que devido à grande quantidade de convidados, é possível que não haja cadeiras para todos. Vamos priorizar os mais velhos. Apesar disso, estou tentando uma alternativa para as cadeiras.
+Por favor note que, devido à grande quantidade de convidados, é possível que não haja cadeiras para todos. Vamos priorizar os mais velhos. Apesar disso, estou tentando uma alternativa para as cadeiras.
 
 Aguardo sua confirmação ${can_confirm.length > 0 ? 'e dos que puder confirmar!' : '!'}`;
 
