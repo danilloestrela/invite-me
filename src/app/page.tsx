@@ -1,4 +1,5 @@
 import { PartyCountdown } from "@/components/PartyCountdown";
+import { partyDate } from "@/constants/defaults";
 import Danillo from "@public/assets/danillo.png";
 import Image from "next/image";
 
@@ -19,7 +20,7 @@ export default function Home() {
             <p className="font-sans text-sm">
 
             </p>
-            <PartyCountdown outerBoxClassName="w-full" targetDateString="January 31, 2025 00:00:00">
+            <PartyCountdown outerBoxClassName="w-full" targetDateString={partyDate}>
               <h2 className="text-xl font-bold">Vamos festejar juntos em 31 de Janeiro de 2024</h2>
             </PartyCountdown>
           </div>

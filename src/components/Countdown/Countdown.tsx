@@ -1,4 +1,5 @@
 "use client";
+import { partyDate } from "@/constants/defaults";
 import { isPast } from "date-fns";
 import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
@@ -16,7 +17,7 @@ export default function CountdownTimer({ targetDateString = null, endMessage = n
   const formatNumber = (num: number) => (num < 10 ? `0${num}` : num);
 
   useEffect(() => {
-    const targetDate = new Date(targetDateString || "January 31, 2025 00:00:00");
+    const targetDate = new Date(targetDateString ||  partyDate);
 
     const countdown = setInterval(() => {
       const now = new Date();

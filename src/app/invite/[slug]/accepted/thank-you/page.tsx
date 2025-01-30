@@ -3,6 +3,7 @@ import { Location } from '@/components/Location';
 import CanConfirmFor from '@/components/modules/invite/CanConfirmFor';
 import { AcceptedThankYouSkeleton } from '@/components/modules/invite/Skeletons';
 import { PartyCountdown } from '@/components/PartyCountdown';
+import { partyDate } from '@/constants/defaults';
 import { useGuest } from '@/hooks/useGuest';
 import { GuestStatusEnum, MergedGuest } from '@/lib/GoogleSheetsService';
 import { checkNextStep } from '@/lib/StepService';
@@ -58,7 +59,7 @@ export default function Page() {
                 <CanConfirmFor guests={guest?.data?.can_confirm as MergedGuest[]} fromGuestId={guest?.data?.id} />
               </div>
             )}
-            <PartyCountdown outerBoxClassName="w-full" targetDateString="January 31, 2025 00:00:00" />
+            <PartyCountdown outerBoxClassName="w-full" targetDateString={partyDate} />
           </div>
         )}
       </>
