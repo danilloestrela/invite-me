@@ -1,8 +1,8 @@
-import { GuestStatusEnum } from "./GoogleSheetsService";
+import { GuestStatus } from "@/constants/general";
 
 interface CheckNextStepProps {
     slug: string;
-    status: GuestStatusEnum;
+    status: GuestStatus;
 }
 
 export function checkNextStep({slug, status}: CheckNextStepProps) {
