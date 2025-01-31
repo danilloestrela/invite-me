@@ -5,11 +5,11 @@ import { DeclinedMessageSkeleton } from '@/components/modules/invite/Skeletons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { GuestStatus } from '@/constants/general';
 import { useToast } from '@/hooks/use-toast';
 import { useGuest } from '@/hooks/useGuest';
-import { GuestsApi } from '@/lib/api';
-import { GuestStatusEnum } from '@/lib/GoogleSheetsService';
 import { checkNextStep } from '@/lib/StepService';
+import { GuestsSingleData } from '@/types/GuestTypes';
 import { useQueryClient } from '@tanstack/react-query';
 import { redirect, useParams } from 'next/navigation';
 import { useState } from 'react';
@@ -20,12 +20,12 @@ export default function Page() {
   const slug = params.slug;
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { guest, updateGuestMutation, guestEnum, validateCodeMutation, isLoading } = useGuest(slug as string);
+  const { guest, updateGuestMutation, validateCodeMutation, isLoading } = useGuest(slug as string);
 
-  const isDeclinedMessagePending = guest?.data?.status === guestEnum.not_attending_message_pending;
+  const isDeclinedMessagePending = guest?.data?.status === GuestStatus.not_attending_message_pending;
 
   if (!isDeclinedMessagePending && guest?.data?.status && !updateGuestMutation?.isPending) {
-    const redirectTo = checkNextStep({ slug: slug as string, status: guest?.data?.status as GuestStatusEnum });
+    const redirectTo = checkNextStep({ slug: slug as string, status: guest?.data?.status as GuestStatus });
     if (redirectTo) redirect(redirectTo);
     return <DeclinedMessageSkeleton />;
   }
@@ -36,7 +36,7 @@ export default function Page() {
   };
 
   const handleMessageChange = (message: string) => {
-    queryClient.setQueryData(['guest', slug], (oldData: GuestsApi.GuestsSingleData | undefined) => {
+    queryClient.setQueryData(['guest', slug], (oldData: GuestsSingleData | undefined) => {
       if (!oldData?.data) return oldData;
       return {
         data: {
@@ -66,7 +66,7 @@ export default function Page() {
       });
       return;
     }
-    updateGuestMutation.mutate({ slug: slug as string, fields: [{ message: guest?.data?.message }, { status: guestEnum.not_attending }] });
+    updateGuestMutation.mutate({ slug: slug as string, fields: [{ message: guest?.data?.message }, { status: GuestStatus.not_attending }] });
   };
 
   if (!isLoading && !updateGuestMutation?.isPending && guest?.data) {

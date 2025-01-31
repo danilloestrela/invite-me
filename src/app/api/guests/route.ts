@@ -1,4 +1,6 @@
-import { getFullGuestsPaginated, MergedGuest } from '@/lib/GoogleSheetsService';
+import { GuestStatus } from "@/constants/general";
+import { getFullGuestsPaginated } from "@/lib/GoogleSheetsService";
+import { MergedGuest } from "@/types/GuestTypes";
 
 export interface ResponseGuests {
   data: MergedGuest[];
@@ -12,10 +14,11 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const page = searchParams.get('page') || 1;
     const pageSize = searchParams.get('pageSize') || 20;
+    const status = searchParams.get('status') || GuestStatus.all;
 
     console.log(page, pageSize);
 
-    const data = await getFullGuestsPaginated({ page: Number(page), pageSize: Number(pageSize) });
+    const data = await getFullGuestsPaginated({ page: Number(page), pageSize: Number(pageSize), status: status as GuestStatus});
     return Response.json({
       data: data.guests,
       total: data.guests.length,

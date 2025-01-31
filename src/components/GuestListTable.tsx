@@ -7,8 +7,9 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
+import { GuestStatus } from "@/constants/general";
 import { useToast } from "@/hooks/use-toast";
-import { MergedGuest } from "@/lib/GoogleSheetsService";
+import { MergedGuest } from "@/types/GuestTypes";
 import { Check, Copy } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -112,8 +113,8 @@ Aguardo sua confirmação ${can_confirm.length > 0 ? 'e dos que puder confirmar!
   )
 }
 
-const StatusCell = ({ status }: { status: string }) => {
-  if (status === 'attending') return <span className="text-green-500 bg-green-100 rounded-md px-2 py-1">Irá a festa! 😄</span>
-  if (status === 'not_attending') return <span className="text-red-500 bg-red-100 rounded-md px-2 py-1">Não irá comparecer 😔</span>
+const StatusCell = ({ status }: { status: GuestStatus }) => {
+  if (status === GuestStatus.attending) return <span className="text-green-500 bg-green-100 rounded-md px-2 py-1">Irá a festa! 😄</span>
+  if (status === GuestStatus.not_attending) return <span className="text-red-500 bg-red-100 rounded-md px-2 py-1">Não irá comparecer 😔</span>
   return <span className="text-yellow-500 bg-yellow-100 rounded-md px-2 py-1">Ainda não confirmou! 🤔 ({status})</span>
 }

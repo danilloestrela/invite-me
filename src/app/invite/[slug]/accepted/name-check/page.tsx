@@ -4,11 +4,11 @@ import { Location } from '@/components/Location';
 import { NameCheckSkeleton } from '@/components/modules/invite/Skeletons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { GuestStatus } from '@/constants/general';
 import { toast } from '@/hooks/use-toast';
 import { useGuest } from '@/hooks/useGuest';
-import { GuestsApi } from '@/lib/api';
-import { GuestStatusEnum } from '@/lib/GoogleSheetsService';
 import { checkNextStep } from '@/lib/StepService';
+import { GuestsSingleData } from '@/types/GuestTypes';
 import { useQueryClient } from '@tanstack/react-query';
 import { redirect, useParams } from 'next/navigation';
 import { useState } from 'react';
@@ -18,9 +18,9 @@ export default function Page() {
   const params = useParams();
   const queryClient = useQueryClient();
   const slug = params.slug;
-  const { guest, isLoading, updateGuestMutation, validateCodeMutation, guestEnum } = useGuest(slug as string);
+  const { guest, isLoading, updateGuestMutation, validateCodeMutation } = useGuest(slug as string);
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    queryClient.setQueryData(['guest', slug], (oldData: GuestsApi.GuestsSingleData | undefined) => {
+    queryClient.setQueryData(['guest', slug], (oldData: GuestsSingleData | undefined) => {
       if (!oldData?.data) return oldData;
       return {
         data: {
@@ -41,7 +41,7 @@ export default function Page() {
       });
       return;
     }
-    await updateGuestMutation.mutateAsync({ slug: slug as string, fields: [{ name: guest.data.name }, { status: guestEnum.attending }] });
+    await updateGuestMutation.mutateAsync({ slug: slug as string, fields: [{ name: guest.data.name }, { status: GuestStatus.attending }] });
   };
 
   const handleCode = (inputCode: string) => {
@@ -49,10 +49,10 @@ export default function Page() {
     setCode(inputCode.toUpperCase().trim());
   };
 
-  const isAttendingNameCheckPending = guest?.data?.status === guestEnum.attending_name_check_pending;
+  const isAttendingNameCheckPending = guest?.data?.status === GuestStatus.attending_name_check_pending;
 
   if (!isAttendingNameCheckPending && guest?.data?.status && !updateGuestMutation.isPending) {
-    const redirectTo = checkNextStep({ slug: slug as string, status: guest?.data?.status as GuestStatusEnum });
+    const redirectTo = checkNextStep({ slug: slug as string, status: guest?.data?.status as GuestStatus });
     if (redirectTo) redirect(redirectTo);
     return <NameCheckSkeleton />;
   }

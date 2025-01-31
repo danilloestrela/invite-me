@@ -1,24 +1,10 @@
-import { MergedGuest } from "@/lib/GoogleSheetsService";
-
-export interface GuestsData {
-    data: MergedGuest[] | null;
-    page: number;
-    totalPages: number;
-}
-
-export interface GuestsSingleData {
-    data: MergedGuest | null;
-}
-
-export interface UpdateGuestFieldProps {
-    slug: string;
-    fields: Partial<{ [key in keyof MergedGuest]: string | number | Date } & { from_id?: string }>[];
-}
+import { GuestStatus } from "@/constants/general";
+import { GuestsData, GuestsSingleData, UpdateGuestFieldProps } from "@/types/GuestTypes";
 
 
 export const guests = {
-    list: async ({ page = 1, pageSize = 20 }: { page?: number, pageSize?: number }): Promise<GuestsData> => {
-        return fetch(`/api/guests?page=${page}&pageSize=${pageSize}`).then((res) => res.json());
+    list: async ({ page = 1, pageSize = 20, status = GuestStatus.all }: { page?: number, pageSize?: number, status?: GuestStatus }): Promise<GuestsData> => {
+        return fetch(`/api/guests?page=${page}&pageSize=${pageSize}&status=${status}`).then((res) => res.json());
     },
     single: async (slug: string): Promise<GuestsSingleData> => {
         return fetch(`/api/guests/${slug}`).then((res) => res.json());

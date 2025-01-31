@@ -1,4 +1,6 @@
+import { GuestFields, GuestStateFields, GuestStatus } from '@/constants/general';
 import { getTableInfo } from '@/helpers/googleapi/googleSheet';
+import { FullGuestsPaginatedResponse, GetTableBasedOnRangeReturn, Guest, GuestState, MergedGuest, UpdateGuestApiProps } from '@/types/GuestTypes';
 import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { google, sheets_v4 } from 'googleapis';
@@ -12,67 +14,7 @@ const doc_id = process.env.GOOGLE_SPREADSHEET_ID as string;
 const guestListTableRange = process.env.GOOGLE_SHEET_GUESTS_LIST_RANGE as string;
 const guestStatesTableRange = process.env.GOOGLE_SHEET_GUEST_STATES_RANGE as string;
 
-enum GuestFields {
-  id = 'id',
-  name = 'name',
-  description = 'description',
-  whatsapp = 'whatsapp',
-  can_confirm = 'can_confirm',
-  relation = 'relation',
-}
 
-enum GuestStateFields {
-  guest_id = 'guest_id',
-  seat = 'seat',
-  code = 'code',
-  status = 'status',
-  message = 'message',
-  acknowledged = 'acknowledged',
-  updated_at = 'updated_at',
-  created_at = 'created_at',
-}
-/**
- * status explanation:
- * to_be_invited: convidado não confirmou presença
- * attending: convidado confirmou presença
- * not_attending: convidado não estará presente
- * acknowledged: link de confirmação foi enviado ao convidado
- * awaiting_accept: convidado ainda não aceitou o convite mesmo após abrir o link de confirmação ou alguém aceitou em seu lugar.
- * rejected: convidado foi retirado da lista de convidados
- */
-export enum GuestStatus {
-  to_be_invited = 'to_be_invited',
-  attending = 'attending',
-  attending_name_check_pending = 'attending_name_check_pending',
-  not_attending = 'not_attending',
-  not_attending_message_pending = 'not_attending_message_pending',
-  acknowledged = 'acknowledged',
-  awaiting_accept = 'awaiting_accept',
-}
-
-export type GuestStatusEnum = keyof typeof GuestStatus;
-
-export interface Guest {
-  id: string;
-  name: string;
-  description?: string;
-  whatsapp?: string;
-  can_confirm?: string[] | string | Omit<MergedGuest, 'can_confirm' | 'code'>[];
-  relation?: string;
-  link?: string;
-}
-
-
-export interface GuestState {
-  guest_id: string;
-  seat?: string;
-  code?: string;
-  message: string;
-  status: GuestStatus;
-  acknowledged: string;
-  updated_at: string;
-  created_at: string;
-}
 
 export async function initGoogleSheetWithGoogleApis() {
   const auth = new google.auth.JWT({
@@ -84,13 +26,6 @@ export async function initGoogleSheetWithGoogleApis() {
   const sheets = google.sheets({ version: 'v4', auth });
 
   return sheets;
-}
-
-interface GetTableBasedOnRangeReturn {
-  res: sheets_v4.Schema$ValueRange;
-  sheets: ReturnType<typeof google.sheets>;
-  headers: string[];
-  rows: string[][];
 }
 
 async function getTableBasedOnRange(range: string): Promise<GetTableBasedOnRangeReturn> {
@@ -143,7 +78,6 @@ export async function getGuestsList(): Promise<Guest[]> {
 /**
  * Merged guests are the states + guest list
  */
-export interface MergedGuest extends Guest, Omit<GuestState, 'guest_id'> { }
 export async function getMergedPublicGuests(): Promise<MergedGuest[]> {
   const { guests, guestStateMap } = await getMergedGuests();
 
@@ -205,17 +139,18 @@ export async function getFullGuests(): Promise<MergedGuest[]> {
   return mergedGuestIncludingCanConfirm as MergedGuest[];
 }
 
-interface FullGuestsPaginatedResponse {
-  guests: MergedGuest[];
-  page: number;
-  totalPages: number;
-}
 
-export async function getFullGuestsPaginated({ page, pageSize }: { page: number, pageSize: number }): Promise<FullGuestsPaginatedResponse> {
+
+export async function getFullGuestsPaginated({ page, pageSize, status }: { page: number, pageSize: number, status: GuestStatus }): Promise<FullGuestsPaginatedResponse> {
   const guests = await getFullGuests();
   const startIndex = (page - 1) * pageSize;
   const endIndex = startIndex + pageSize;
   const totalPages = Math.ceil(guests.length / pageSize);
+  if(status !== GuestStatus.all) {
+    const filteredGuests = guests.filter((guest) => guest.status === status as unknown);
+    const currentGuestsForPage = filteredGuests.slice(startIndex, endIndex);
+    return { guests: currentGuestsForPage, page, totalPages };
+  }
   const currentGuestsForPage = guests.slice(startIndex, endIndex);
   return { guests: currentGuestsForPage, page, totalPages };
 }
@@ -227,10 +162,7 @@ export async function getGuestById(id: string): Promise<MergedGuest | undefined>
   return guest;
 }
 
-interface UpdateGuestApiProps {
-  id: string;
-  fields: { [key in keyof MergedGuest]: string }[];
-}
+
 
 export async function updateGuestField({ id, fields }: UpdateGuestApiProps) {
   const validatedFormat = validatesForDatabaseRequiredFormat(fields);

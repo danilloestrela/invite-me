@@ -12,7 +12,7 @@ import Loading from "../loading";
 export default function Home() {
   const { toast } = useToast();
   const { isAuthenticated, login } = useAuth();
-  const { guests, isLoading, gotoPageMutation } = useGuests(isAuthenticated);
+  const { guests, isLoading, gotoPageMutation } = useGuests({authenticated: isAuthenticated});
   if (isLoading) return <Loading />;
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
