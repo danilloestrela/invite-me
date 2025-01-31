@@ -1,9 +1,10 @@
 'use client';
 import CanConfirmFor from '@/components/modules/invite/CanConfirmFor';
 import { DeclinedThankYouSkeleton } from '@/components/modules/invite/Skeletons';
+import { GuestStatus } from '@/constants/general';
 import { useGuest } from '@/hooks/useGuest';
-import { GuestStatusEnum, MergedGuest } from '@/lib/GoogleSheetsService';
 import { checkNextStep } from '@/lib/StepService';
+import { MergedGuest } from '@/types/GuestTypes';
 import { formatDistanceToNow, parse } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { ptBR } from 'date-fns/locale';
@@ -12,10 +13,10 @@ import { redirect, useParams } from 'next/navigation';
 export default function Page() {
   const params = useParams();
   const slug = params.slug;
-  const { guest, isLoading, guestEnum } = useGuest(slug as string);
+  const { guest, isLoading } = useGuest(slug as string);
 
-  if (guest?.data?.status !== guestEnum.not_attending) {
-    const redirectTo = checkNextStep({ slug: slug as string, status: guest?.data?.status as GuestStatusEnum });
+  if (guest?.data?.status !== GuestStatus.not_attending) {
+    const redirectTo = checkNextStep({ slug: slug as string, status: guest?.data?.status as GuestStatus });
     if (redirectTo) redirect(redirectTo);
     return <DeclinedThankYouSkeleton />;
   }

@@ -3,9 +3,9 @@ import { ConfirmationDialog } from '@/components/ConfirmationDialog';
 import { InviteSkeleton } from '@/components/modules/invite/Skeletons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { GuestStatus } from '@/constants/general';
 import { useToast } from '@/hooks/use-toast';
 import { useGuest } from '@/hooks/useGuest';
-import { GuestStatusEnum } from '@/lib/GoogleSheetsService';
 import { checkNextStep } from '@/lib/StepService';
 import { redirect, useParams } from 'next/navigation';
 import { useState } from 'react';
@@ -15,7 +15,7 @@ export default function Page() {
   const params = useParams();
   const { toast } = useToast();
   const slug = params.slug;
-  const { guest, isLoading, updateGuestMutation, validateCodeMutation, guestEnum } = useGuest(slug as string);
+  const { guest, isLoading, updateGuestMutation, validateCodeMutation } = useGuest(slug as string);
 
   const handlePresenceAction = async (action: boolean = false) => {
     if (!guest?.data?.id) {
@@ -25,7 +25,7 @@ export default function Page() {
       });
       return;
     }
-    const status = action ? guestEnum.attending_name_check_pending : guestEnum.not_attending_message_pending;
+    const status = action ? GuestStatus.attending_name_check_pending : GuestStatus.not_attending_message_pending;
     const isCodeValid = await validateCodeMutation.mutateAsync({ guestId: slug as string, code });
     if (!isCodeValid) {
       toast({
@@ -42,10 +42,10 @@ export default function Page() {
     setCode(inputCode.toUpperCase().trim());
   };
 
-  const isToBeInvited = guest?.data?.status === guestEnum.to_be_invited;
+  const isToBeInvited = guest?.data?.status === GuestStatus.to_be_invited;
 
   if (!isToBeInvited && guest?.data && !updateGuestMutation.isPending) {
-    const redirectTo = checkNextStep({ slug: slug as string, status: guest.data?.status as GuestStatusEnum });
+    const redirectTo = checkNextStep({ slug: slug as string, status: guest.data?.status as GuestStatus });
     if (redirectTo) redirect(redirectTo);
     return <InviteSkeleton />;
   }

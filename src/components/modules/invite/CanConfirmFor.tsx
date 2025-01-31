@@ -4,9 +4,10 @@ import { FormControl, FormDescription, FormItem, FormMessage } from '@/component
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
-import { guestEnum, useGuest, useToast } from '@/hooks';
-import { MergedGuest } from '@/lib/GoogleSheetsService';
+import { GuestStatus } from '@/constants/general';
+import { useGuest, useToast } from '@/hooks';
 import { encodeBase64WithSalt } from '@/lib/utils';
+import { MergedGuest } from '@/types/GuestTypes';
 import { Check, X } from 'lucide-react';
 import { useState } from 'react';
 import { FormProvider, useForm, UseFormReturn } from 'react-hook-form';
@@ -33,7 +34,7 @@ interface CanConfirmStepperForms {
     name: string;
 }
 
-type StepType = typeof guestEnum[keyof typeof guestEnum];
+type StepType = typeof GuestStatus[keyof typeof GuestStatus];
 
 interface CanConfirmStepperProps {
     guest: MergedGuest;
@@ -70,46 +71,46 @@ function CanConfirmStepper({ guest, fromGuestId }: CanConfirmStepperProps) {
         }
         formMethods.setValue('code', '')
         switch (toStep) {
-            case guestEnum.attending_name_check_pending:
+            case GuestStatus.attending_name_check_pending:
                 updateGuestMutation.mutate(
-                    { slug, fields: [{ from_id: fromGuestId }, { status: guestEnum.attending_name_check_pending }] },
+                    { slug, fields: [{ from_id: fromGuestId }, { status: GuestStatus.attending_name_check_pending }] },
                     {
                         onSuccess: () => {
                             successToast();
-                            setStep(guestEnum.attending_name_check_pending);
+                            setStep(GuestStatus.attending_name_check_pending);
                         },
                     }
                 );
                 break;
-            case guestEnum.attending:
+            case GuestStatus.attending:
                 updateGuestMutation.mutate(
-                    { slug, fields: [{ from_id: fromGuestId }, { name: formMethods.watch('name') }, { status: guestEnum.attending }] },
+                    { slug, fields: [{ from_id: fromGuestId }, { name: formMethods.watch('name') }, { status: GuestStatus.attending }] },
                     {
                         onSuccess: () => {
                             successToast();
-                            setStep(guestEnum.attending);
+                            setStep(GuestStatus.attending);
                         },
                     }
                 );
                 break;
-            case guestEnum.not_attending_message_pending:
+            case GuestStatus.not_attending_message_pending:
                 updateGuestMutation.mutate(
-                    { slug, fields: [{ from_id: fromGuestId }, { message: formMethods.watch('message') }, { status: guestEnum.not_attending_message_pending }] },
+                    { slug, fields: [{ from_id: fromGuestId }, { message: formMethods.watch('message') }, { status: GuestStatus.not_attending_message_pending }] },
                     {
                         onSuccess: () => {
                             successToast();
-                            setStep(guestEnum.not_attending_message_pending);
+                            setStep(GuestStatus.not_attending_message_pending);
                         },
                     }
                 );
                 break;
-            case guestEnum.not_attending:
+            case GuestStatus.not_attending:
                 updateGuestMutation.mutate(
-                    { slug, fields: [{ from_id: fromGuestId }, { message: formMethods.watch('message') }, { status: guestEnum.not_attending }] },
+                    { slug, fields: [{ from_id: fromGuestId }, { message: formMethods.watch('message') }, { status: GuestStatus.not_attending }] },
                     {
                         onSuccess: () => {
                             successToast();
-                            setStep(guestEnum.not_attending);
+                            setStep(GuestStatus.not_attending);
                         },
                     }
                 );
@@ -130,17 +131,17 @@ function CanConfirmStepper({ guest, fromGuestId }: CanConfirmStepperProps) {
     return (
         <div className="bg-white p-4 rounded-lg">
             <FormProvider {...formMethods}>
-                {step === guestEnum.attending && <div>{formMethods.watch('name')}: <span className="text-green-500 bg-green-100 rounded-md px-2 py-1">Irá a festa! 😄</span></div>}
-                {step === guestEnum.to_be_invited && (
-                    <StepConfirmDecline {...stepProps} toStep={[guestEnum.attending_name_check_pending!, guestEnum.not_attending_message_pending!]} />
+                {step === GuestStatus.attending && <div>{formMethods.watch('name')}: <span className="text-green-500 bg-green-100 rounded-md px-2 py-1">Irá a festa! 😄</span></div>}
+                {step === GuestStatus.to_be_invited && (
+                    <StepConfirmDecline {...stepProps} toStep={[GuestStatus.attending_name_check_pending!, GuestStatus.not_attending_message_pending!]} />
                 )}
-                {step === guestEnum.attending_name_check_pending && (
-                    <StepConfirmName {...stepProps} toStep={guestEnum.attending!} />
+                {step === GuestStatus.attending_name_check_pending && (
+                    <StepConfirmName {...stepProps} toStep={GuestStatus.attending!} />
                 )}
-                {step === guestEnum.not_attending_message_pending && (
-                    <StepConfirmMessage {...stepProps} toStep={guestEnum.not_attending!} />
+                {step === GuestStatus.not_attending_message_pending && (
+                    <StepConfirmMessage {...stepProps} toStep={GuestStatus.not_attending!} />
                 )}
-                {step === guestEnum.not_attending && <div>{formMethods.watch('name')} <span className="text-red-500 bg-red-100 rounded-md px-2 py-1">Não irá comparecer 😔</span></div>}
+                {step === GuestStatus.not_attending && <div>{formMethods.watch('name')} <span className="text-red-500 bg-red-100 rounded-md px-2 py-1">Não irá comparecer 😔</span></div>}
             </FormProvider>
         </div>
     );

@@ -12,7 +12,7 @@ import Loading from "../loading";
 export default function Home() {
   const { toast } = useToast();
   const { isAuthenticated, login } = useAuth();
-  const { guests, isLoading, gotoPageMutation } = useGuests(
+  const { guests, isLoading } = useGuests(
     {
       authenticated: isAuthenticated,
       status: GuestStatus.attending,
@@ -38,10 +38,6 @@ export default function Home() {
       });
       e.currentTarget.reset();
     }
-  }
-
-  const handlePageChange = (page: number) => {
-    gotoPageMutation.mutate(page);
   }
 
   if (!isLoading) {
